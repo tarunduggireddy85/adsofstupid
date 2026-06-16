@@ -1,0 +1,98 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-strong: #111827; /* Premium Midnight Slate */
+  --color-brand-mid: #5c43fd; /* Vibrant Indigo-Violet Accent */
+  --color-accent-soft: #818cf8; /* Soft Indigo */
+  --color-surface-tint: #f0f0ff; /* Soft tint of indigo-white */
+  --color-surface-main: #fafaff; /* Premium cool light background with indigo hint */
+  --color-ink-strong: #111827; /* Rich dark slate */
+  --color-ink-soft: rgba(17, 24, 39, 0.72); /* Muted dark slate text */
+
+  --font-display: var(--font-plus-jakarta), "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
+  --font-body: var(--font-plus-jakarta), "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
+  --font-accent: "Playfair Display", Georgia, serif;
+
+  /* ============================================================
+     LAB / TOOL ELEMENT COLORS  (5 elements of the growth formula)
+     Use ONLY in the lab/tool sections (Problem Journey, Growth
+     Formula, Tool Stack, Lab Protocol). NOT for base UI.
+     Each is a small family: DEFAULT / -soft (light bg) / -deep (text).
+     Enables utilities like bg-research, text-strategy-deep, etc.
+     ============================================================ */
+  --color-research: #7f77dd;        /* Research  — purple */
+  --color-research-soft: #ecebfa;
+  --color-research-deep: #564fb0;
+
+  --color-strategy: #378add;        /* Strategy  — blue */
+  --color-strategy-soft: #e4f0fb;
+  --color-strategy-deep: #2467ae;
+
+  --color-acquisition: #d85a30;     /* Acquisition — coral */
+  --color-acquisition-soft: #fbe9e1;
+  --color-acquisition-deep: #a8401e;
+
+  --color-conversion: #639922;      /* Conversion — green */
+  --color-conversion-soft: #eef5e1;
+  --color-conversion-deep: #4a731a;
+
+  --color-scale: #1d9e75;           /* Scale — teal */
+  --color-scale-soft: #e0f4ee;
+  --color-scale-deep: #146f52;
+}
+
+:root {
+  color-scheme: light;
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-surface-main);
+  color: var(--color-ink-strong);
+  font-family: var(--font-body);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* ============================================================
+   HERO ANIMATIONS (CSS-driven = GPU-composited, far cheaper
+   than JS/Framer loops). Used by components/Hero.tsx.
+   ============================================================ */
+@keyframes aos-spin { to { transform: rotate(360deg); } }
+@keyframes aos-spin-rev { to { transform: rotate(-360deg); } }
+@keyframes aos-blip { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
+@keyframes aos-float-up { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@keyframes aos-float-down { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(6px); } }
+
+.aos-orbit { animation: aos-spin 32s linear infinite; will-change: transform; }
+.aos-orbit-rev { animation: aos-spin-rev 32s linear infinite; will-change: transform; }
+.aos-blip { animation: aos-blip 1.4s ease-in-out infinite; }
+.aos-float-up { animation: aos-float-up 3s ease-in-out infinite; }
+.aos-float-down { animation: aos-float-down 3s ease-in-out infinite; animation-delay: 0.5s; }
+
+/* gentle, slow drift for the proof stat cards (staggered via inline delay) */
+@keyframes aos-card-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+.aos-card-float { animation: aos-card-float 5s ease-in-out infinite; will-change: transform; }
+
+/* floating journey-card icons (slightly larger drift) */
+@keyframes aos-icon-float { 0%, 100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-12px) rotate(1deg); } }
+.aos-icon-float { animation: aos-icon-float 4.5s ease-in-out infinite; will-change: transform; }
+
+/* scroll-cue nudge */
+@keyframes aos-nudge { 0%, 100% { transform: translateY(0); opacity: 0.55; } 50% { transform: translateY(6px); opacity: 1; } }
+.aos-nudge { animation: aos-nudge 1.6s ease-in-out infinite; }
+
+/* typewriter caret */
+@keyframes aos-caret { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+.aos-caret { display: inline-block; width: 0.06em; align-self: stretch; background: currentColor; margin-left: 0.06em; animation: aos-caret 0.9s step-end infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .aos-orbit, .aos-orbit-rev, .aos-blip, .aos-float-up, .aos-float-down, .aos-card-float, .aos-icon-float {
+    animation: none !important;
+  }
+}
+

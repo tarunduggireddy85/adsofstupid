@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40" fill="none">
+  <defs>
+    <linearGradient id="logo-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a56abd" />
+      <stop offset="100%" stop-color="#6e3482" />
+    </linearGradient>
+  </defs>
+  <!-- Beautiful geometric flask + growth chart icon -->
+  <path d="M12 8h16v2H12V8zm6 3h4v4h-4v-4zm-8 16l8-10 6 5 10-12" stroke="url(#logo-grad)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M8 32h24c2.209 0 4-1.791 4-4V18c0-2.209-1.791-4-4-4H8c-2.209 0-4 1.791-4 4v10c0 2.209 1.791 4 4 4z" stroke="url(#logo-grad)" stroke-width="2" stroke-dasharray="2 2" opacity="0.6" />
+  <circle cx="18" cy="27" r="2.5" fill="#a56abd" />
+  <circle cx="24" cy="22" r="2.5" fill="#6e3482" />
+</svg>
