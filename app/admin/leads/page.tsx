@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { ConfirmModal } from "@/components/admin/ConfirmModal";
 import { Toast } from "@/components/ui/Toast";
 import type { Lead } from "@/lib/db";
-import { Trash2, Loader2, Calendar, Phone, Briefcase, Smile } from "lucide-react";
+import { Trash2, Loader2, Calendar, Phone, Mail, Briefcase, Smile } from "lucide-react";
 
 export default function LeadsPage() {
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -64,7 +64,9 @@ export default function LeadsPage() {
       lead.name.toLowerCase().includes(query) ||
       lead.brand.toLowerCase().includes(query) ||
       lead.painPoint.toLowerCase().includes(query) ||
-      lead.phone.toLowerCase().includes(query)
+      lead.phone.toLowerCase().includes(query) ||
+      (lead.email || "").toLowerCase().includes(query) ||
+      (lead.source || "").toLowerCase().includes(query)
     );
   });
 
@@ -104,6 +106,7 @@ export default function LeadsPage() {
               <thead>
                 <tr>
                   <th>Submitter</th>
+                  <th>Source</th>
                   <th>Brand Info</th>
                   <th>Core Pain Point</th>
                   <th>Submitted At</th>
@@ -118,10 +121,23 @@ export default function LeadsPage() {
                         <Smile size={16} className="text-[#5c43fd]/60" />
                         {lead.name}
                       </div>
-                      <div className="text-[0.82rem] text-zinc-500 flex items-center gap-1 mt-0.5">
-                        <Phone size={12} className="text-zinc-400" />
-                        {lead.phone}
-                      </div>
+                      {lead.email ? (
+                        <div className="text-[0.82rem] text-zinc-500 flex items-center gap-1 mt-0.5">
+                          <Mail size={12} className="text-zinc-400" />
+                          {lead.email}
+                        </div>
+                      ) : null}
+                      {lead.phone ? (
+                        <div className="text-[0.82rem] text-zinc-500 flex items-center gap-1 mt-0.5">
+                          <Phone size={12} className="text-zinc-400" />
+                          {lead.phone}
+                        </div>
+                      ) : null}
+                    </td>
+                    <td>
+                      <span className="admin-badge admin-badge--published" style={{ background: "rgba(92,67,253,0.1)", color: "#5c43fd" }}>
+                        {lead.source || "Website"}
+                      </span>
                     </td>
                     <td>
                       <div className="flex items-center gap-1.5 font-medium text-zinc-800">

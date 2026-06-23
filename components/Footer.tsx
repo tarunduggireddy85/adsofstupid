@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import React from "react";
+import { SocialLinks } from "./SocialLinks";
 
 interface FooterLink {
   href: string;
@@ -23,31 +24,6 @@ const SERVICES_LINKS: FooterLink[] = [
   { href: "/meta-ads-management", label: "Meta and Google Ads" },
   { href: "/shopify-cro", label: "Shopify funnel optimization" },
   { href: "/whatsapp-marketing", label: "WhatsApp and Email marketing" },
-];
-
-const SOCIAL_LINKS = [
-  {
-    href: "https://instagram.com",
-    label: "Instagram",
-    icon: (
-      <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
-        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
-      </svg>
-    ),
-  },
-  {
-    href: "https://linkedin.com",
-    label: "LinkedIn",
-    icon: (
-      <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
-        <rect x="2" y="9" width="4" height="12" />
-        <circle cx="4" cy="4" r="2" />
-      </svg>
-    ),
-  },
 ];
 
 export function Footer() {
@@ -136,31 +112,23 @@ export function Footer() {
               </a>
             </li>
             <li>
-              <a className="text-zinc-500 hover:text-[#5c43fd] transition-colors duration-180 no-underline font-semibold text-[0.92rem]" href="https://wa.me/910000000000">
-                WhatsApp: +91 00000 00000
+              <a className="text-zinc-500 hover:text-[#5c43fd] transition-colors duration-180 no-underline font-semibold text-[0.92rem]" href="https://wa.me/918530639877">
+                WhatsApp: +91 85306 39877
+              </a>
+            </li>
+            <li>
+              <a className="text-zinc-500 hover:text-[#5c43fd] transition-colors duration-180 no-underline font-semibold text-[0.92rem]" href="tel:+918530639877">
+                Phone: +91 85306 39877
               </a>
             </li>
             <li className="text-[0.92rem] text-zinc-400 font-semibold">Pune, Maharashtra, India</li>
           </ul>
-          <div className="flex flex-wrap gap-2.5 mt-5">
-            {SOCIAL_LINKS.map((social) => (
-              <a 
-                key={social.href}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-zinc-200 bg-white/50 backdrop-blur-sm text-zinc-500 hover:text-[#5c43fd] hover:border-[#5c43fd]/20 hover:bg-[#5c43fd]/5 transition-all duration-300 text-[0.82rem] font-semibold shadow-xs hover:-translate-y-0.5" 
-                href={social.href}
-                rel="noreferrer" 
-                target="_blank"
-                aria-label={social.label}
-              >
-                {social.icon}
-              </a>
-            ))}
-          </div>
+          <SocialLinks className="mt-5" />
         </div>
       </div>
       
       
-      <div className="w-full text-center text-[clamp(2rem,14vw,11.5rem)] font-sans font-black text-[#5c43fd]/[0.07] pointer-events-none mt-16 mb-[-1.5rem] select-none relative z-10 leading-none whitespace-nowrap">
+      <div className="w-full text-center text-[clamp(1.5rem,11.5vw,11.5rem)] font-sans font-black text-[#5c43fd]/[0.07] pointer-events-none mt-16 mb-[-1.5rem] select-none relative z-10 leading-none whitespace-nowrap px-2">
         Ads Of Stupid
       </div>
       

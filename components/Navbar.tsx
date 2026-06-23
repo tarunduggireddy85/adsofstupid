@@ -12,9 +12,9 @@ interface NavbarProps {
 
 const navLinks = [
   { href: "#proof", label: "Projects" },
-  { href: "#blog", label: "Blog" },
-  { href: "#contact", label: "Contact" },
-  { href: "#why", label: "About" }
+  { href: "/blog", label: "Blog" },
+  { href: "/about", label: "About" },
+  { href: "/contact", label: "Contact" }
 ] as const;
 
 export function Navbar({

@@ -1,1 +1,30 @@
-[]
+[
+  {
+    "id": "lead-1782142561311",
+    "name": "Tharun Duggireddy",
+    "phone": "+919172460437",
+    "brand": "",
+    "painPoint": "Goals: [Meta & Google Ads] | Budget: [Under 50k] | Message: thank you",
+    "source": "Homepage contact",
+    "createdAt": "2026-06-22T15:36:01.311Z"
+  },
+  {
+    "id": "lead-1782143201413",
+    "name": "Ads of Stupid",
+    "phone": "9172460437",
+    "brand": "",
+    "painPoint": "Free brand strategy request",
+    "source": "Popup",
+    "createdAt": "2026-06-22T15:46:41.413Z"
+  },
+  {
+    "id": "lead-1782202453693",
+    "name": "Test Lead (env wiring)",
+    "phone": "",
+    "email": "hello@adsofstupid.com",
+    "brand": "Test Brand",
+    "painPoint": "Verifying the email alert pipeline end to end",
+    "source": "Contact page � email-wiring-test",
+    "createdAt": "2026-06-23T08:14:13.693Z"
+  }
+]

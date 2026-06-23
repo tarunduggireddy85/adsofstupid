@@ -5,8 +5,8 @@ import { useEffect, useState } from "react";
 import { BlogTable } from "@/components/admin/BlogTable";
 import { ConfirmModal } from "@/components/admin/ConfirmModal";
 import { Toast } from "@/components/ui/Toast";
-import { deleteBlog, getBlogs } from "@/lib/blogService";
-import { BLOG_CATEGORIES, type BlogPost } from "@/lib/mockBlogs";
+import { deleteBlog, getBlogs, setBlogStatus } from "@/lib/blogService";
+import { type BlogPost } from "@/lib/mockBlogs";
 import { Plus } from "lucide-react";
 
 export default function BlogsPage() {
@@ -18,7 +18,9 @@ export default function BlogsPage() {
   const [toast, setToast] = useState("");
 
   useEffect(() => {
-    setBlogs(getBlogs());
+    (async () => {
+      setBlogs(await getBlogs());
+    })();
 
     const flashMessage = window.sessionStorage.getItem("admin-toast");
 
@@ -28,16 +30,36 @@ export default function BlogsPage() {
     }
   }, []);
 
-  function handleConfirmDelete() {
+  async function handleConfirmDelete() {
     if (!pendingDelete) {
       return;
     }
 
-    deleteBlog(pendingDelete.id);
-    setBlogs(getBlogs());
-    setToast(`"${pendingDelete.title}" deleted.`);
-    setPendingDelete(null);
+    const title = pendingDelete.title;
+    try {
+      await deleteBlog(pendingDelete.id);
+      setBlogs(await getBlogs());
+      setToast(`"${title}" deleted.`);
+    } catch (error) {
+      setToast(error instanceof Error ? error.message : "Failed to delete blog.");
+    } finally {
+      setPendingDelete(null);
+    }
   }
+
+  async function handleStatusChange(blog: BlogPost, nextStatus: BlogPost["status"]) {
+    try {
+      await setBlogStatus(blog.id, nextStatus);
+      setBlogs(await getBlogs());
+      const verb =
+        nextStatus === "Published" ? "published" : nextStatus === "Archived" ? "archived" : "moved to draft";
+      setToast(`"${blog.title}" ${verb}.`);
+    } catch (error) {
+      setToast(error instanceof Error ? error.message : "Failed to update status.");
+    }
+  }
+
+  const categories = Array.from(new Set(blogs.map((blog) => blog.category).filter(Boolean)));
 
   const filteredBlogs = blogs.filter((blog) => {
     const matchesSearch = blog.title.toLowerCase().includes(search.toLowerCase());
@@ -78,6 +100,7 @@ export default function BlogsPage() {
             <option value="All">All Statuses</option>
             <option value="Published">Published</option>
             <option value="Draft">Draft</option>
+            <option value="Archived">Archived</option>
           </select>
           <select
             className="admin-input"
@@ -85,7 +108,7 @@ export default function BlogsPage() {
             value={category}
           >
             <option value="All">All Categories</option>
-            {BLOG_CATEGORIES.map((item) => (
+            {categories.map((item) => (
               <option key={item} value={item}>
                 {item}
               </option>
@@ -94,7 +117,7 @@ export default function BlogsPage() {
         </div>
 
         {filteredBlogs.length ? (
-          <BlogTable blogs={filteredBlogs} onDelete={setPendingDelete} />
+          <BlogTable blogs={filteredBlogs} onDelete={setPendingDelete} onStatusChange={handleStatusChange} />
         ) : (
           <div className="admin-empty-state">
             <h3>No blogs found</h3>

@@ -72,7 +72,7 @@ export async function POST(request: Request) {
       category: category || "Business",
       tags: Array.isArray(tags) ? tags : [],
       author: author || "Admin User",
-      status: status === "Draft" ? "Draft" : "Published",
+      status: status === "Published" ? "Published" : status === "Archived" ? "Archived" : "Draft",
       createdAt: new Date().toISOString(),
       publishDate: publishDate || new Date().toISOString().split("T")[0],
       seoTitle: seoTitle || title,

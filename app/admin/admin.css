@@ -302,6 +302,11 @@
   color: #92400e;
 }
 
+.admin-badge--archived {
+  background: rgba(100, 116, 139, 0.16);
+  color: #475569;
+}
+
 .admin-filters {
   gap: 14px;
   margin-bottom: 24px;

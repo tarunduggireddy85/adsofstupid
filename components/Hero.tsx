@@ -231,22 +231,26 @@ function CountUpRupee({
   style?: React.CSSProperties;
 }) {
   const [val, setVal] = useState(target);
-  const targetRef = useRef(target);
-  targetRef.current = target;
+  const valRef = useRef(target);
 
+  // Animate toward the new target, then STOP — don't keep an idle rAF loop
+  // running forever (that was burning a frame every tick for the page's life).
   useEffect(() => {
     let raf: number;
-    const tick = () => {
-      setVal((v) => {
-        const diff = targetRef.current - v;
-        if (Math.abs(diff) < 1) return targetRef.current; // identical -> React bails, no re-render
-        return v + diff * 0.12;
-      });
-      raf = requestAnimationFrame(tick);
+    const loop = () => {
+      const diff = target - valRef.current;
+      if (Math.abs(diff) < 1) {
+        valRef.current = target;
+        setVal(target);
+        return; // settled: loop ends until target changes
+      }
+      valRef.current += diff * 0.12;
+      setVal(valRef.current);
+      raf = requestAnimationFrame(loop);
     };
-    raf = requestAnimationFrame(tick);
+    raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
-  }, []);
+  }, [target]);
 
   return (
     <span className={className} style={style}>
@@ -403,8 +407,9 @@ function Phone({
 /* ============================================================
    ORBIT RING  (CSS-animated, memoized so it never re-renders)
    ============================================================ */
-const OrbitRing = memo(function OrbitRing() {
+const OrbitRing = memo(function OrbitRing({ paused = false }: { paused?: boolean }) {
   const R = 270;
+  const playState = paused ? "paused" : "running";
   return (
     <div aria-hidden="true" className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
       {/* static rings */}
@@ -414,8 +419,8 @@ const OrbitRing = memo(function OrbitRing() {
         <div className="absolute inset-[70px] rounded-full border-[1.5px]" style={{ borderColor: "rgba(92,67,253,.10)" }} />
       </div>
 
-      {/* rotating spokes (CSS keyframes) */}
-      <div className="aos-orbit absolute left-1/2 top-1/2" style={{ width: 0, height: 0 }}>
+      {/* rotating spokes (CSS keyframes) — paused when off-screen */}
+      <div className="aos-orbit absolute left-1/2 top-1/2" style={{ width: 0, height: 0, animationPlayState: playState }}>
         {ORBIT_LOGOS.map((l, i) => {
           const a = (i / ORBIT_LOGOS.length) * Math.PI * 2;
           // integer px so SSR and client render identical strings
@@ -423,7 +428,7 @@ const OrbitRing = memo(function OrbitRing() {
           const y = Math.round(-Math.cos(a) * R);
           return (
             <div key={l.id} className="absolute left-0 top-0" style={{ transform: `translate(${x}px, ${y}px)` }}>
-              <div className="aos-orbit-rev w-[80px] h-[80px] -translate-x-1/2 -translate-y-1/2">
+              <div className="aos-orbit-rev w-[80px] h-[80px] -translate-x-1/2 -translate-y-1/2" style={{ animationPlayState: playState }}>
                 <l.Comp />
               </div>
             </div>
@@ -438,6 +443,19 @@ const OrbitRing = memo(function OrbitRing() {
    HERO
    ============================================================ */
 export function Hero() {
+  /* ---- pause all hero animation work when scrolled out of view ---- */
+  const sectionRef = useRef<HTMLElement>(null);
+  const [inView, setInView] = useState(true);
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting), {
+      rootMargin: "120px"
+    });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
   /* ---- reveal hero content on first scroll (header is visible on landing) ---- */
   const [started, setStarted] = useState(false);
   useEffect(() => {
@@ -476,8 +494,9 @@ export function Hero() {
     return arr;
   });
 
-  /* sale engine */
+  /* sale engine — only runs while the hero is on-screen */
   useEffect(() => {
+    if (!inView) return;
     const fire = () => {
       const chan = pickWeighted(CHANNELS_BASE);
       const amount = Math.round((299 + Math.random() * 5200) / 10) * 10;
@@ -490,7 +509,7 @@ export function Hero() {
     };
     const t = setInterval(fire, SALE_INTERVAL);
     return () => clearInterval(t);
-  }, []);
+  }, [inView]);
 
   const heroBgStyle = {
     background: `
@@ -505,7 +524,8 @@ export function Hero() {
 
   return (
     <section
-      className="relative overflow-clip flex flex-col items-center pt-28 sm:pt-36 pb-12 sm:pb-16 scroll-mt-28 isolate w-full"
+      ref={sectionRef}
+      className="relative overflow-clip flex flex-col items-center min-h-[62svh] sm:min-h-[80svh] lg:min-h-[86svh] pt-10 sm:pt-20 lg:pt-24 pb-10 sm:pb-16 scroll-mt-28 isolate w-full"
       id="home"
       style={heroBgStyle}
     >
@@ -525,7 +545,7 @@ export function Hero() {
       <div aria-hidden="true" className="absolute bottom-[8%] right-[5%] w-[min(32vw,24rem)] aspect-square rounded-full bg-[#5c43fd]/6 blur-[72px] pointer-events-none z-0" />
 
       <motion.div
-        className="w-full max-w-[1200px] mx-auto px-5 sm:px-8 relative z-[1] flex flex-col items-center"
+        className="w-full max-w-[1200px] mx-auto px-5 sm:px-8 relative z-[1] flex flex-col items-center flex-1 justify-center"
         initial="hidden"
         variants={containerVariants}
         animate="show"
@@ -540,7 +560,7 @@ export function Hero() {
 
         {/* H1 */}
         <motion.h1
-          className="relative font-sans text-[clamp(1.95rem,6vw,4.2rem)] leading-[1.12] tracking-[-0.035em] font-semibold text-zinc-950 text-center max-w-[900px] w-full"
+          className="relative font-sans text-[clamp(2.3rem,7vw,5.2rem)] leading-[1.1] tracking-[-0.035em] font-semibold text-zinc-950 text-center max-w-[960px] w-full"
           variants={lineContainer}
         >
           <motion.span className="block" variants={itemVariants}>
@@ -575,9 +595,17 @@ export function Hero() {
           </motion.span>
         </motion.h1>
 
-        {/* everything below the headline reveals on first scroll */}
+        {/* everything below the headline reveals on first scroll —
+           collapsed to zero height on landing so the title sits centred
+           with no empty gap below it. */}
         <motion.div
-          className="contents"
+          className="w-full overflow-hidden"
+          initial={false}
+          animate={{ height: started ? "auto" : 0 }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        >
+        <motion.div
+          className="w-full flex flex-col items-center pt-2"
           initial="hidden"
           variants={containerVariants}
           animate={started ? "show" : "hidden"}
@@ -620,13 +648,29 @@ export function Hero() {
         {/* LIVE-SALES VISUAL: phone + orbit ring */}
         <motion.div className="relative w-full flex items-center justify-center mt-8 sm:mt-12 h-[340px] sm:h-[450px] md:h-[540px] lg:h-[600px]" variants={itemVariants}>
           <div className="relative w-[600px] h-[600px] flex-shrink-0 origin-center scale-[0.58] sm:scale-[0.74] md:scale-90 lg:scale-100">
-            <OrbitRing />
+            <OrbitRing paused={!inView} />
             <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
               <Phone revenue={revenue} orders={orders} channels={channels} points={points} />
             </div>
           </div>
         </motion.div>
         </motion.div>
+        </motion.div>
+
+        {/* scroll hint — only on landing, before the reveal */}
+        {!started && (
+          <motion.div
+            className="flex flex-col items-center gap-1.5 mt-10 text-zinc-400 select-none pointer-events-none"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1, y: [0, 7, 0] }}
+            transition={{ opacity: { delay: 0.9, duration: 0.6 }, y: { repeat: Infinity, duration: 1.8, ease: "easeInOut" } }}
+          >
+            <span className="text-[0.72rem] font-semibold tracking-[0.18em] uppercase">Scroll</span>
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M6 9l6 6 6-6" />
+            </svg>
+          </motion.div>
+        )}
       </motion.div>
     </section>
   );

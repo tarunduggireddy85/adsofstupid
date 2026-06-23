@@ -10,3 +10,8 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+
+# env files — keep .env.example committed, never the real secrets
+.env
+.env.local
+.env*.local

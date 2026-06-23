@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans } from "next/font/google";
+import { Plus_Jakarta_Sans, Playfair_Display } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { SmoothScroll } from "../components/SmoothScroll";
@@ -10,46 +10,92 @@ const plusJakarta = Plus_Jakarta_Sans({
   display: "swap",
 });
 
-const title = "Performance Marketing Agency for D2C Brands in Pune | Ads of Stupid";
-const description = "We're the performance marketing agency for early-stage D2C founders in Pune. Ads, funnels, strategy, retention - built for predictable, profitable sales.";
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-playfair",
+  display: "swap",
+  weight: ["400", "500", "600"],
+  style: ["normal", "italic"],
+});
+
+const SITE_URL = "https://www.adsofstupid.com";
+
+const homeTitle = "D2C Performance Marketing Agency India | Ads of Stupid";
+const homeDescription =
+  "Performance marketing for D2C founders in India. 13× ROAS, ₹30L+ ad spend managed. We decode the science behind the sale. Book a free strategy call.";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://adsofstupid.com"),
-  title,
-  description,
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: homeTitle,
+    template: "%s | Ads of Stupid"
+  },
+  description: homeDescription,
   keywords: [
+    "d2c marketing agency",
     "performance marketing agency",
-    "performance marketing agency in Pune",
-    "performance marketing agency for D2C brands",
-    "D2C growth strategy Pune",
-    "Meta ads agency Pune",
-    "Shopify funnel optimization India"
+    "d2c marketing india",
+    "meta ads agency",
+    "google ads agency",
+    "d2c growth",
+    "ecommerce marketing",
+    "shopify ads",
+    "performance marketing pune",
+    "ads of stupid"
   ],
   alternates: {
-    canonical: "https://adsofstupid.com"
+    canonical: "/"
   },
+  robots: { index: true, follow: true },
   openGraph: {
-    title: "Ads of Stupid - Performance Marketing Agency for D2C Brands",
-    description: "You focus on the product. We focus on the profit. The performance marketing agency that runs the entire growth engine for early-stage D2C brands.",
-    url: "https://adsofstupid.com",
+    title: homeTitle,
+    description: homeDescription,
+    url: SITE_URL,
     siteName: "Ads of Stupid",
     locale: "en_IN",
-    type: "website"
+    type: "website",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Ads of Stupid — D2C performance marketing agency in India"
+      }
+    ]
   },
   twitter: {
     card: "summary_large_image",
-    title: "Ads of Stupid - Performance Marketing Agency for D2C Brands",
-    description: "You focus on the product. We focus on the profit. The performance marketing agency that runs the entire growth engine for early-stage D2C brands."
+    title: homeTitle,
+    description: homeDescription,
+    images: ["/og-image.png"]
   }
+};
+
+const organizationSchema = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "Ads of Stupid",
+  url: SITE_URL,
+  logo: `${SITE_URL}/Ads-of-Stupid-logo.png`,
+  image: `${SITE_URL}/og-image.png`,
+  description: homeDescription,
+  email: "hello@adsofstupid.com",
+  telephone: "+91 85306 39877",
+  sameAs: [
+    "https://www.instagram.com/adsofstupid/",
+    "https://www.facebook.com/people/Ads-of-Stupid/61575891251614/",
+    "https://www.linkedin.com/company/adsofstupid/",
+    "https://www.youtube.com/@adsofstupid"
+  ]
 };
 
 const localBusinessSchema = {
   "@context": "https://schema.org",
   "@type": "LocalBusiness",
   name: "Ads of Stupid",
-  url: "https://adsofstupid.com",
-  image: "https://adsofstupid.com/og-image.jpg",
-  description,
+  url: SITE_URL,
+  image: `${SITE_URL}/og-image.png`,
+  description: homeDescription,
   areaServed: "Pune, Maharashtra, India",
   address: {
     "@type": "PostalAddress",
@@ -58,7 +104,7 @@ const localBusinessSchema = {
     addressCountry: "IN"
   },
   email: "hello@adsofstupid.com",
-  telephone: "+91 00000 00000"
+  telephone: "+91 85306 39877"
 };
 
 const serviceSchema = {
@@ -87,9 +133,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={plusJakarta.variable} suppressHydrationWarning>
+      <body className={`${plusJakarta.variable} ${playfair.variable}`} suppressHydrationWarning>
         <SmoothScroll />
 
+        <Script
+          id="ads-of-stupid-organization-schema"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(organizationSchema)
+          }}
+        />
         <Script
           id="ads-of-stupid-local-business-schema"
           type="application/ld+json"

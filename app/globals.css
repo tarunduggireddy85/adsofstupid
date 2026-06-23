@@ -11,7 +11,7 @@
 
   --font-display: var(--font-plus-jakarta), "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
   --font-body: var(--font-plus-jakarta), "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
-  --font-accent: "Playfair Display", Georgia, serif;
+  --font-accent: var(--font-playfair), "Playfair Display", Georgia, serif;
 
   /* ============================================================
      LAB / TOOL ELEMENT COLORS  (5 elements of the growth formula)
@@ -58,6 +58,15 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Balance headings so phrases break into even lines instead of leaving
+   orphaned words; keep body copy from leaving single-word last lines. */
+h1, h2, h3 {
+  text-wrap: balance;
+}
+p {
+  text-wrap: pretty;
+}
+
 /* ============================================================
    HERO ANIMATIONS (CSS-driven = GPU-composited, far cheaper
    than JS/Framer loops). Used by components/Hero.tsx.
@@ -90,8 +99,23 @@ html {
 @keyframes aos-caret { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
 .aos-caret { display: inline-block; width: 0.06em; align-self: stretch; background: currentColor; margin-left: 0.06em; animation: aos-caret 0.9s step-end infinite; }
 
+/* animated gradient text */
+@keyframes aos-gradient-pan { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+.aos-gradient-text { background-size: 220% auto; animation: aos-gradient-pan 6s ease-in-out infinite; }
+
+/* slow drifting background orbs */
+@keyframes aos-drift-a { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(26px, -32px) scale(1.08); } }
+@keyframes aos-drift-b { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(-30px, 24px) scale(1.1); } }
+.aos-drift-a { animation: aos-drift-a 15s ease-in-out infinite; will-change: transform; }
+.aos-drift-b { animation: aos-drift-b 19s ease-in-out infinite; will-change: transform; }
+
+/* gentle float for hero value pills */
+@keyframes aos-float-soft { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
+.aos-float-soft { animation: aos-float-soft 6s ease-in-out infinite; will-change: transform; }
+
 @media (prefers-reduced-motion: reduce) {
-  .aos-orbit, .aos-orbit-rev, .aos-blip, .aos-float-up, .aos-float-down, .aos-card-float, .aos-icon-float {
+  .aos-orbit, .aos-orbit-rev, .aos-blip, .aos-float-up, .aos-float-down, .aos-card-float, .aos-icon-float,
+  .aos-gradient-text, .aos-drift-a, .aos-drift-b, .aos-float-soft {
     animation: none !important;
   }
 }

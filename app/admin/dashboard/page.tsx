@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { getBlogStats, getBlogs } from "@/lib/blogService";
+import { getBlogs } from "@/lib/blogService";
 import type { BlogPost } from "@/lib/mockBlogs";
 import { Plus, Eye } from "lucide-react";
 
@@ -16,8 +16,21 @@ export default function DashboardPage() {
   });
 
   useEffect(() => {
-    setRecentBlogs(getBlogs().slice(0, 5));
-    setStats(getBlogStats());
+    let active = true;
+    (async () => {
+      const blogs = await getBlogs();
+      if (!active) return;
+      setRecentBlogs(blogs.slice(0, 5));
+      setStats({
+        totalBlogs: blogs.length,
+        publishedBlogs: blogs.filter((b) => b.status === "Published").length,
+        draftBlogs: blogs.filter((b) => b.status === "Draft").length,
+        totalCategories: new Set(blogs.map((b) => b.category)).size
+      });
+    })();
+    return () => {
+      active = false;
+    };
   }, []);
 
   return (

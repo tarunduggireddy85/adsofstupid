@@ -90,7 +90,7 @@ const formulaElements = [
 
 /* ============================================================
    PIE CHART — builds one colored slice per element; the active
-   step is shown inside the ring.
+   step is shown inside the ring. Bigger, glowing active segment.
    ============================================================ */
 function PieChart({
   progress,
@@ -104,33 +104,48 @@ function PieChart({
   size?: "lg" | "sm";
 }) {
   const uid = useId().replace(/[:]/g, "");
-  const R = 46;
+  const R = 52;
   const C = 2 * Math.PI * R;
   const seg = C / 5;
   const gap = size === "lg" ? 6 : 4;
+  const sw = size === "lg" ? 15 : 13;
   const p = Math.max(0, Math.min(1, progress));
   const active = formulaElements[activeIndex];
 
   return (
     <div className="relative w-full" style={{ aspectRatio: "1 / 1" }}>
-      <svg viewBox="0 0 120 120" className="w-full h-full -rotate-90" aria-hidden>
-        <circle cx="60" cy="60" r={R} fill="none" stroke="#ecebf6" strokeWidth={size === "lg" ? 12 : 13} />
+      {/* soft colored glow behind the ring, tinted by the active element */}
+      <div
+        className="absolute inset-[14%] rounded-full blur-3xl opacity-25 transition-colors duration-500"
+        style={{ background: active.color }}
+        aria-hidden
+      />
+
+      <svg viewBox="0 0 130 130" className="relative w-full h-full -rotate-90" aria-hidden>
+        {/* inner disc so the centre reads clean over the glow */}
+        <circle cx="65" cy="65" r={R - sw / 2 - 1} fill="#ffffff" />
+        {/* track */}
+        <circle cx="65" cy="65" r={R} fill="none" stroke="#ecebf6" strokeWidth={sw} />
         {ELEMENT_COLORS.map((c, i) => {
           const segP = Math.max(0, Math.min(1, (p - i / 5) / (1 / 5)));
           const visible = Math.max(0, (seg - gap) * segP);
+          const isActive = i === activeIndex && segP > 0 && segP < 1;
           return (
             <circle
               key={`${uid}-${i}`}
-              cx="60"
-              cy="60"
+              cx="65"
+              cy="65"
               r={R}
               fill="none"
               stroke={c}
-              strokeWidth={size === "lg" ? 12 : 13}
+              strokeWidth={isActive ? sw + 2 : sw}
               strokeLinecap="round"
               strokeDasharray={`${visible} ${C}`}
-              transform={`rotate(${i * 72 + 2} 60 60)`}
-              style={{ transition: "stroke-dasharray 0.18s linear" }}
+              transform={`rotate(${i * 72 + 2} 65 65)`}
+              style={{
+                transition: "stroke-dasharray 0.18s linear, stroke-width 0.3s ease",
+                filter: isActive ? `drop-shadow(0 0 6px ${c}99)` : "none",
+              }}
             />
           );
         })}
@@ -138,19 +153,29 @@ function PieChart({
 
       {/* center label (steps inside the pie) */}
       {size === "lg" && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
-          <span className="text-[0.66rem] font-bold tracking-[0.22em] uppercase text-zinc-400">
-            Step {active.number} / 05
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-8">
+          <span className="text-[0.66rem] font-bold tracking-[0.28em] uppercase text-zinc-400">
+            Step {active.number} <span className="text-zinc-300">/ 05</span>
           </span>
           <span
-            className="mt-1 font-sans font-bold tracking-tight leading-none text-[1.7rem]"
+            className="mt-1.5 font-sans font-bold tracking-tight leading-none text-[2rem] transition-colors duration-300"
             style={{ color: active.color }}
           >
             {active.tag}
           </span>
-          <span className="mt-2 text-[0.72rem] font-semibold text-zinc-400">
-            {filledCount} of 5 complete
-          </span>
+          {/* progress dots replace the old "x of 5" line */}
+          <div className="mt-4 flex items-center gap-2">
+            {ELEMENT_COLORS.map((c, i) => (
+              <span
+                key={i}
+                className="h-2 rounded-full transition-all duration-300"
+                style={{
+                  width: i === activeIndex ? "1.4rem" : "0.5rem",
+                  background: i < filledCount || i === activeIndex ? c : "#dcdbec",
+                }}
+              />
+            ))}
+          </div>
         </div>
       )}
     </div>
@@ -164,12 +189,10 @@ export function Formula() {
   const sectionRef = useRef<HTMLElement>(null);
   const cardsRef = useRef<HTMLDivElement>(null);
   const [progress, setProgress] = useState(0);
-  const [titleP, setTitleP] = useState(0);
 
   useEffect(() => {
     const cardsEl = cardsRef.current;
-    const sectionEl = sectionRef.current;
-    if (!cardsEl || !sectionEl) return;
+    if (!cardsEl) return;
     let raf = 0;
     const update = () => {
       raf = 0;
@@ -177,9 +200,6 @@ export function Formula() {
       // pie fill — based on the cards block passing the viewport centre
       const cr = cardsEl.getBoundingClientRect();
       setProgress(Math.max(0, Math.min(1, (vh * 0.5 - cr.top) / cr.height)));
-      // title shrink — based on how far the section top has passed the viewport top
-      const sr = sectionEl.getBoundingClientRect();
-      setTitleP(Math.max(0, Math.min(1, -sr.top / 320)));
     };
     const onScroll = () => {
       if (!raf) raf = requestAnimationFrame(update);
@@ -197,44 +217,24 @@ export function Formula() {
   const activeIndex = Math.max(0, Math.min(4, Math.floor(progress * 5 - 1e-6)));
   const filledCount = Math.min(5, Math.round(progress * 5));
 
-  // interpolations for the shrinking sticky title
-  const titleFont = `clamp(1.35rem, ${(5 - 3.3 * titleP).toFixed(2)}vw, ${(3.5 - 2.1 * titleP).toFixed(2)}rem)`;
-  const supOpacity = Math.max(0, 1 - titleP * 1.8);
-  const supMax = `${Math.max(0, 1 - titleP * 1.4) * 110}px`;
-  const barStuck = titleP > 0.06;
-
   return (
     <section ref={sectionRef} className="relative bg-transparent pt-16 sm:pt-24 pb-20 scroll-mt-28 w-full overflow-x-clip" id="formula">
-      {/* ===== STICKY SHRINKING TITLE ===== */}
-      <div
-        className={`sticky top-0 z-30 transition-[background-color,box-shadow] duration-300 ${
-          barStuck
-            ? "bg-surface-main/85 backdrop-blur-md shadow-[0_6px_20px_rgba(30,45,90,0.05)]"
-            : "bg-transparent"
-        }`}
-      >
-        <div className="w-full max-w-[900px] mx-auto px-5 py-3 sm:py-4 flex flex-col items-center text-center">
-          <div style={{ opacity: supOpacity, maxHeight: supMax, overflow: "hidden" }} className="flex justify-center">
-            <EyebrowBadge animatePulse>The growth formula lab</EyebrowBadge>
-          </div>
-          <h2
-            className="font-sans font-semibold leading-[1.08] text-zinc-950 tracking-tight transition-[font-size] duration-150"
-            style={{ fontSize: titleFont }}
-          >
-            The growth formula we run for every{" "}
-            <span className="bg-gradient-to-r from-[#8c76ff] to-[#5c43fd] bg-clip-text text-transparent">D2C brand.</span>
-          </h2>
-          <p
-            style={{ opacity: supOpacity, maxHeight: supMax, overflow: "hidden" }}
-            className="text-zinc-500 max-w-[580px] mx-auto text-[1.05rem] leading-[1.7] mt-3"
-          >
-            Five elements. One system. One partner. We decode the science behind the sale so your store stops guessing and starts scaling.
-          </p>
+      {/* ===== SECTION TITLE ===== */}
+      <div className="w-full max-w-[900px] mx-auto px-5 flex flex-col items-center text-center">
+        <div className="flex justify-center">
+          <EyebrowBadge animatePulse>The growth formula lab</EyebrowBadge>
         </div>
+        <h2 className="mt-4 font-sans font-semibold leading-[1.1] text-zinc-950 tracking-tight text-[clamp(1.9rem,5vw,3.25rem)]">
+          The growth formula we run for every{" "}
+          <span className="bg-gradient-to-r from-[#8c76ff] to-[#5c43fd] bg-clip-text text-transparent">D2C brand.</span>
+        </h2>
+        <p className="text-zinc-500 max-w-[580px] mx-auto text-[1.05rem] leading-[1.7] mt-4">
+          Five elements. One system. One partner. We decode the science behind the sale so your store stops guessing and starts scaling.
+        </p>
       </div>
 
-      {/* mobile pie progress (sits just under the title bar) */}
-      <div className="lg:hidden sticky top-[58px] z-20 mx-auto mt-2 w-[min(440px,calc(100vw-2rem))] rounded-full border border-zinc-200/80 bg-white/85 backdrop-blur-md shadow-[0_8px_24px_rgba(30,45,90,0.08)] px-3 py-2 flex items-center gap-3">
+      {/* mobile pie progress (sticky compact indicator) */}
+      <div className="lg:hidden sticky top-[12px] z-20 mx-auto mt-6 w-[min(440px,calc(100vw-2rem))] rounded-full border border-zinc-200/80 bg-white/85 backdrop-blur-md shadow-[0_8px_24px_rgba(30,45,90,0.08)] px-3 py-2 flex items-center gap-3">
         <div className="relative w-9 h-9 shrink-0">
           <PieChart progress={progress} activeIndex={activeIndex} filledCount={filledCount} size="sm" />
         </div>
@@ -251,24 +251,24 @@ export function Formula() {
       </div>
 
       {/* ===== MAIN GRID ===== */}
-      <div className="w-full max-w-[1200px] mx-auto mt-8 lg:mt-12 px-4 md:px-6 lg:px-8 lg:grid lg:grid-cols-[360px_1fr] lg:gap-16">
+      <div className="w-full max-w-[1240px] mx-auto mt-8 lg:mt-14 px-4 md:px-6 lg:px-8 lg:grid lg:grid-cols-[420px_1fr] lg:gap-14 xl:gap-20">
         {/* LEFT: big sticky pie */}
         <div className="hidden lg:block">
-          <div className="sticky top-[128px]">
-            <div className="w-[330px] mx-auto">
+          <div className="sticky top-[150px]">
+            <div className="w-[400px] mx-auto">
               <PieChart progress={progress} activeIndex={activeIndex} filledCount={filledCount} />
             </div>
           </div>
         </div>
 
         {/* RIGHT: element cards (scroll under the title) */}
-        <div ref={cardsRef} className="flex flex-col gap-6 sm:gap-8">
+        <div ref={cardsRef} className="flex flex-col gap-7 sm:gap-9">
           {formulaElements.map((element, index) => {
             const isEven = index % 2 === 0;
             return (
               <motion.article
                 key={element.number}
-                className="relative overflow-hidden rounded-[2rem] border border-zinc-200/80 bg-white p-7 md:p-10 shadow-[0_20px_50px_rgba(92,67,253,0.04)]"
+                className="group relative overflow-hidden rounded-[2rem] border border-zinc-200/70 bg-white p-7 md:p-9 lg:p-10 shadow-[0_20px_50px_rgba(92,67,253,0.05)] transition-shadow duration-300 hover:shadow-[0_28px_64px_rgba(92,67,253,0.09)]"
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ amount: 0.2, once: true }}
@@ -276,35 +276,51 @@ export function Formula() {
               >
                 {/* color accent bar */}
                 <span className="absolute left-0 top-0 h-full w-1.5" style={{ background: element.color }} />
+                {/* faint number watermark, tinted by element */}
+                <span
+                  className="pointer-events-none absolute -top-4 right-2 font-sans font-black text-[7rem] leading-none select-none"
+                  style={{ color: `${element.color}0d` }}
+                  aria-hidden
+                >
+                  {element.number}
+                </span>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-7 lg:gap-12 items-center w-full">
+                <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-7 lg:gap-10 items-center w-full">
                   {/* text */}
                   <div className={`flex flex-col lg:col-span-7 ${isEven ? "lg:order-1" : "lg:order-2"}`}>
                     <div className="flex items-center gap-3">
-                      <span className="font-sans font-black text-[1.7rem] leading-none" style={{ color: `${element.color}40` }}>
+                      <span
+                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl font-sans font-bold text-[0.95rem] leading-none"
+                        style={{ color: element.color, background: `${element.color}14` }}
+                      >
                         {element.number}
                       </span>
                       <span
-                        className="px-3.5 py-1.5 rounded-full text-[0.78rem] tracking-wide font-bold uppercase leading-none"
+                        className="px-3.5 py-1.5 rounded-full text-[0.78rem] tracking-[0.08em] font-bold uppercase leading-none"
                         style={{ color: element.color, background: `${element.color}14` }}
                       >
                         {element.tag}
                       </span>
                     </div>
 
-                    <h3 className="mt-5 text-[1.6rem] md:text-[2rem] font-sans font-semibold leading-[1.18] text-zinc-950 tracking-tight max-w-[20ch]">
+                    <h3 className="mt-5 text-[1.55rem] md:text-[1.95rem] font-sans font-semibold leading-[1.22] text-zinc-900 tracking-tight max-w-[22ch]">
                       {element.title}
                     </h3>
-                    <p className="mt-3.5 text-zinc-600 text-[1.02rem] leading-[1.7] max-w-[46ch]">{element.body}</p>
+                    <p className="mt-4 text-zinc-600 text-[1.05rem] leading-[1.75] max-w-[48ch]">{element.body}</p>
 
-                    <div className="mt-6 pt-5 border-t border-zinc-100">
-                      <span className="text-[0.7rem] font-bold tracking-[0.18em] uppercase text-zinc-400">What&apos;s included</span>
-                      <ul className="mt-3.5 p-0 list-none grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
+                    <div className="mt-6 pt-6 border-t border-zinc-100">
+                      <span
+                        className="text-[0.72rem] font-bold tracking-[0.18em] uppercase"
+                        style={{ color: element.color }}
+                      >
+                        What&apos;s included
+                      </span>
+                      <ul className="mt-4 p-0 list-none grid grid-cols-1 sm:grid-cols-2 gap-x-7 gap-y-3.5">
                         {element.services.map((service) => (
-                          <li className="flex items-start gap-2.5 text-zinc-700 text-[0.95rem] leading-[1.45]" key={service}>
+                          <li className="flex items-start gap-2.5 text-zinc-700 text-[0.98rem] leading-[1.55]" key={service}>
                             <span
-                              className="mt-0.5 flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full"
-                              style={{ background: `${element.color}1a`, color: element.color }}
+                              className="mt-[3px] flex h-[19px] w-[19px] shrink-0 items-center justify-center rounded-full"
+                              style={{ background: `${element.color}1f`, color: element.color }}
                             >
                               <Check className="h-3 w-3 stroke-[3]" />
                             </span>
@@ -317,8 +333,11 @@ export function Formula() {
 
                   {/* icon visual */}
                   <div className={`flex items-center justify-center lg:col-span-5 ${isEven ? "lg:order-2" : "lg:order-1"}`}>
-                    <div className="relative flex items-center justify-center py-2">
-                      <div className="absolute w-44 h-44 sm:w-56 sm:h-56 rounded-full blur-3xl opacity-45" style={{ background: element.color }} />
+                    <div
+                      className="relative flex items-center justify-center w-full rounded-[1.75rem] p-6 sm:p-8"
+                      style={{ background: `linear-gradient(160deg, ${element.color}12, ${element.color}05)` }}
+                    >
+                      <div className="absolute w-40 h-40 sm:w-52 sm:h-52 rounded-full blur-3xl opacity-40" style={{ background: element.color }} />
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={element.icon}
@@ -326,7 +345,7 @@ export function Formula() {
                         width={280}
                         height={280}
                         draggable={false}
-                        className="relative w-40 h-40 sm:w-56 sm:h-56 object-contain rounded-[2rem] select-none drop-shadow-[0_20px_36px_rgba(20,30,70,0.18)]"
+                        className="relative w-36 h-36 sm:w-52 sm:h-52 object-contain rounded-[2rem] select-none drop-shadow-[0_20px_36px_rgba(20,30,70,0.18)] transition-transform duration-500 group-hover:scale-[1.04]"
                       />
                     </div>
                   </div>

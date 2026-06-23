@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { logoutAdmin } from "@/lib/authService";
-import { LayoutDashboard, FileText, SquarePen, LogOut } from "lucide-react";
+import { LayoutDashboard, FileText, SquarePen, Inbox, LogOut } from "lucide-react";
 
 const navItems = [
   { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/blogs", label: "All Blogs", icon: FileText },
-  { href: "/admin/blogs/add", label: "Add Blog", icon: SquarePen }
+  { href: "/admin/blogs/add", label: "Add Blog", icon: SquarePen },
+  { href: "/admin/leads", label: "Leads", icon: Inbox }
 ];
 
 type SidebarProps = {

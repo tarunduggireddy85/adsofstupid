@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { BlogForm } from "@/components/admin/BlogForm";
 import { createBlog } from "@/lib/blogService";
@@ -7,11 +8,17 @@ import type { BlogInput } from "@/lib/blogService";
 
 export default function AddBlogPage() {
   const router = useRouter();
+  const [error, setError] = useState("");
 
   async function handleCreate(values: BlogInput) {
-    createBlog(values);
-    window.sessionStorage.setItem("admin-toast", "Blog created successfully.");
-    router.push("/admin/blogs");
+    setError("");
+    try {
+      await createBlog(values);
+      window.sessionStorage.setItem("admin-toast", "Blog created successfully.");
+      router.push("/admin/blogs");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to create blog post.");
+    }
   }
 
   return (
@@ -23,6 +30,7 @@ export default function AddBlogPage() {
             <h2>Create a blog post</h2>
           </div>
         </div>
+        {error ? <p className="admin-error" style={{ marginBottom: "1rem" }}>{error}</p> : null}
         <BlogForm onSubmit={handleCreate} submitLabel="Create Blog" />
       </section>
     </div>

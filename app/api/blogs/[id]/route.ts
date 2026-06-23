@@ -17,7 +17,7 @@ export async function GET(
       return NextResponse.json({ error: "Blog not found" }, { status: 404 });
     }
 
-    if (blog.status === "Draft") {
+    if (blog.status !== "Published") {
       const cookieStore = await cookies();
       const isAdmin = cookieStore.get("admin_auth")?.value === "true";
       if (!isAdmin) {

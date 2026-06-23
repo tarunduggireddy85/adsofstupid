@@ -3,14 +3,22 @@
 import Link from "next/link";
 import type { BlogPost } from "@/lib/mockBlogs";
 import { BlogCard } from "./BlogCard";
+import { BlogStatusMenu } from "./BlogStatusMenu";
 import { Eye, Pencil, Trash2 } from "lucide-react";
 
 type BlogTableProps = {
   blogs: BlogPost[];
   onDelete: (blog: BlogPost) => void;
+  onStatusChange: (blog: BlogPost, status: BlogPost["status"]) => void;
 };
 
-export function BlogTable({ blogs, onDelete }: BlogTableProps) {
+function badgeClass(status: BlogPost["status"]) {
+  if (status === "Published") return "admin-badge--published";
+  if (status === "Archived") return "admin-badge--archived";
+  return "admin-badge--draft";
+}
+
+export function BlogTable({ blogs, onDelete, onStatusChange }: BlogTableProps) {
   return (
     <>
       <div className="admin-table-wrap">
@@ -34,13 +42,7 @@ export function BlogTable({ blogs, onDelete }: BlogTableProps) {
                 </td>
                 <td>{blog.category}</td>
                 <td>
-                  <span
-                    className={`admin-badge ${
-                      blog.status === "Published"
-                        ? "admin-badge--published"
-                        : "admin-badge--draft"
-                    }`}
-                  >
+                  <span className={`admin-badge ${badgeClass(blog.status)}`}>
                     {blog.status}
                   </span>
                 </td>
@@ -73,6 +75,7 @@ export function BlogTable({ blogs, onDelete }: BlogTableProps) {
                       <Trash2 size={16} />
                       Delete
                     </button>
+                    <BlogStatusMenu blog={blog} onChange={onStatusChange} />
                   </div>
                 </td>
               </tr>
@@ -82,7 +85,7 @@ export function BlogTable({ blogs, onDelete }: BlogTableProps) {
       </div>
       <div className="admin-blog-grid">
         {blogs.map((blog) => (
-          <BlogCard blog={blog} key={blog.id} onDelete={onDelete} />
+          <BlogCard blog={blog} key={blog.id} onDelete={onDelete} onStatusChange={onStatusChange} />
         ))}
       </div>
     </>

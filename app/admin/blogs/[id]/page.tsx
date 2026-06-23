@@ -10,17 +10,31 @@ import { ArrowLeft, Pencil } from "lucide-react";
 export default function BlogPreviewPage() {
   const params = useParams<{ id: string }>();
   const [blog, setBlog] = useState<BlogPost | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setBlog(getBlogById(params.id));
+    (async () => {
+      setBlog(await getBlogById(params.id));
+      setLoading(false);
+    })();
   }, [params.id]);
+
+  if (loading) {
+    return (
+      <div className="admin-page">
+        <section className="admin-panel admin-empty-state">
+          <h2>Loading…</h2>
+        </section>
+      </div>
+    );
+  }
 
   if (!blog) {
     return (
       <div className="admin-page">
         <section className="admin-panel admin-empty-state">
           <h2>Blog post not found</h2>
-          <p>The requested blog could not be loaded from local storage.</p>
+          <p>The requested blog could not be loaded.</p>
           <Link className="admin-button" href="/admin/blogs">
             <ArrowLeft size={16} />
             Back to blogs

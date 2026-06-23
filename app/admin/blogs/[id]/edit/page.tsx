@@ -12,15 +12,35 @@ export default function EditBlogPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const [blog, setBlog] = useState<BlogPost | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    setBlog(getBlogById(params.id));
+    (async () => {
+      setBlog(await getBlogById(params.id));
+      setLoading(false);
+    })();
   }, [params.id]);
 
   async function handleUpdate(values: BlogInput) {
-    updateBlog(params.id, values);
-    window.sessionStorage.setItem("admin-toast", "Blog updated successfully.");
-    router.push("/admin/blogs");
+    setError("");
+    try {
+      await updateBlog(params.id, values);
+      window.sessionStorage.setItem("admin-toast", "Blog updated successfully.");
+      router.push("/admin/blogs");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update blog post.");
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="admin-page">
+        <section className="admin-panel admin-empty-state">
+          <h2>Loading…</h2>
+        </section>
+      </div>
+    );
   }
 
   if (!blog) {
@@ -46,6 +66,7 @@ export default function EditBlogPage() {
             <h2>Edit blog post</h2>
           </div>
         </div>
+        {error ? <p className="admin-error" style={{ marginBottom: "1rem" }}>{error}</p> : null}
         <BlogForm initialValues={blog} onSubmit={handleUpdate} submitLabel="Save Changes" />
       </section>
     </div>

@@ -6,8 +6,10 @@ export type Lead = {
   id: string;
   name: string;
   phone: string;
+  email: string;
   brand: string;
   painPoint: string;
+  source: string;
   createdAt: string;
 };
 

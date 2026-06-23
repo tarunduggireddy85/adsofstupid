@@ -7,7 +7,8 @@ import { Menu, LogOut, User } from "lucide-react";
 const pageTitles: Record<string, string> = {
   "/admin/dashboard": "Dashboard",
   "/admin/blogs": "All Blogs",
-  "/admin/blogs/add": "Add Blog"
+  "/admin/blogs/add": "Add Blog",
+  "/admin/leads": "Leads"
 };
 
 type TopbarProps = {

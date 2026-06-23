@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server";
+import { readLeads, writeLeads, type Lead } from "@/lib/db";
+import { notifyNewLead } from "@/lib/notify";
 
 type LeadPayload = {
   brand?: string;
   name?: string;
   painPoint?: string;
   phone?: string;
+  email?: string;
+  source?: string;
 };
 
 function normalize(value: unknown) {
@@ -16,69 +20,52 @@ export async function POST(request: Request) {
 
   const name = normalize(body?.name);
   const phone = normalize(body?.phone);
+  const email = normalize(body?.email);
   const brand = normalize(body?.brand);
   const painPoint = normalize(body?.painPoint);
+  const source = normalize(body?.source) || "Website";
 
-  if (!name || !phone || !painPoint) {
+  if (!name || (!phone && !email)) {
     return NextResponse.json(
-      { error: "Name, phone, and pain point are required." },
+      { error: "Name and an email or phone number are required." },
       { status: 400 }
     );
   }
 
+  const lead: Lead = {
+    id: `lead-${Date.now()}`,
+    name,
+    phone,
+    email,
+    brand,
+    painPoint,
+    source,
+    createdAt: new Date().toISOString()
+  };
+
+  // 1) Persist to the backend (this is what the admin Leads panel reads)
+  try {
+    const leads = await readLeads();
+    leads.push(lead);
+    await writeLeads(leads);
+  } catch (error) {
+    console.error("Failed to save lead:", error);
+    return NextResponse.json(
+      { error: "Could not save your details right now. Please try again." },
+      { status: 500 }
+    );
+  }
+
+  // 2) Fire notifications (owner alert + lead confirmation). Never blocks/breaks.
+  await notifyNewLead(lead).catch((error) => console.error("Notification error:", error));
+
+  // 3) Optional: also forward to a Google Sheet if configured
   const sheetWebhook = process.env.GOOGLE_APPS_SCRIPT_URL;
-
-  if (!sheetWebhook) {
-    return NextResponse.json(
-      {
-        error:
-          "Contact storage is not configured yet. Add GOOGLE_APPS_SCRIPT_URL to enable submissions."
-      },
-      { status: 503 }
-    );
-  }
-
-  const sheetResponse = await fetch(sheetWebhook, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      timestamp: new Date().toISOString(),
-      name,
-      phone,
-      brand,
-      painPoint
-    }),
-    cache: "no-store"
-  });
-
-  if (!sheetResponse.ok) {
-    return NextResponse.json(
-      { error: "Lead capture failed. Please try again shortly." },
-      { status: 502 }
-    );
-  }
-
-  const interaktWebhook = process.env.INTERAKT_WEBHOOK_URL;
-  if (interaktWebhook) {
-    await fetch(interaktWebhook, {
+  if (sheetWebhook) {
+    fetch(sheetWebhook, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        message: `🔔 New lead: ${name} | ${phone} | Stuck with: ${painPoint.slice(
-          0,
-          80
-        )}`,
-        lead: {
-          brand,
-          name,
-          painPoint,
-          phone
-        }
-      }),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ timestamp: lead.createdAt, name, phone, email, brand, painPoint, source }),
       cache: "no-store"
     }).catch(() => null);
   }

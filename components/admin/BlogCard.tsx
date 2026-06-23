@@ -2,14 +2,22 @@
 
 import Link from "next/link";
 import type { BlogPost } from "@/lib/mockBlogs";
+import { BlogStatusMenu } from "./BlogStatusMenu";
 import { Eye, Pencil, Trash2 } from "lucide-react";
 
 type BlogCardProps = {
   blog: BlogPost;
   onDelete: (blog: BlogPost) => void;
+  onStatusChange: (blog: BlogPost, status: BlogPost["status"]) => void;
 };
 
-export function BlogCard({ blog, onDelete }: BlogCardProps) {
+function badgeClass(status: BlogPost["status"]) {
+  if (status === "Published") return "admin-badge--published";
+  if (status === "Archived") return "admin-badge--archived";
+  return "admin-badge--draft";
+}
+
+export function BlogCard({ blog, onDelete, onStatusChange }: BlogCardProps) {
   return (
     <article className="admin-blog-card">
       <div className="admin-blog-card__top">
@@ -17,13 +25,7 @@ export function BlogCard({ blog, onDelete }: BlogCardProps) {
           <p className="admin-overline">{blog.category}</p>
           <h3 className="admin-blog-card__title">{blog.title}</h3>
         </div>
-        <span
-          className={`admin-badge ${
-            blog.status === "Published"
-              ? "admin-badge--published"
-              : "admin-badge--draft"
-          }`}
-        >
+        <span className={`admin-badge ${badgeClass(blog.status)}`}>
           {blog.status}
         </span>
       </div>
@@ -54,6 +56,7 @@ export function BlogCard({ blog, onDelete }: BlogCardProps) {
           <Trash2 size={16} />
           Delete
         </button>
+        <BlogStatusMenu blog={blog} onChange={onStatusChange} />
       </div>
     </article>
   );
