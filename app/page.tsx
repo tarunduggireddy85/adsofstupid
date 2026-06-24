@@ -7,6 +7,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { SiteHeader } from "../components/SiteHeader";
 import { StrategyPopup } from "../components/StrategyPopup";
 import { leadSource } from "../lib/leadSource";
+import { trackLead } from "../lib/fbq";
 import { Hero } from "../components/Hero";
 import { Proof } from "../components/Proof";
 import { Journey } from "../components/Journey";
@@ -80,6 +81,7 @@ export default function Home() {
 
       if (response.ok) {
         setFormState("success");
+        trackLead({ source: "Homepage contact" });
         form.reset();
         return;
       }

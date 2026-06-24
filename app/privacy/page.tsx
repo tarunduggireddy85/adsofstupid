@@ -200,7 +200,7 @@ export default function PrivacyPolicyPage() {
                 { href: "/", label: "Home" },
                 { href: "/#formula", label: "What we do" },
                 { href: "/#proof", label: "Projects" },
-                { href: "/#blog", label: "Blog" },
+                { href: "/blog", label: "Blog" },
                 { href: "/#contact", label: "Contact" },
                 { href: "/privacy", label: "Privacy Policy" },
               ].map((l) => (
@@ -214,11 +214,10 @@ export default function PrivacyPolicyPage() {
             <h3 className="m-0 text-[0.88rem] font-bold text-[#5c43fd] uppercase tracking-wider mb-4">Services</h3>
             <ul className="m-0 p-0 list-none grid gap-2.5">
               {[
-                { href: "/performance-marketing-agency-pune", label: "Performance marketing" },
-                { href: "/d2c-growth-strategy", label: "D2C growth strategy" },
-                { href: "/meta-ads-management", label: "Meta and Google Ads" },
-                { href: "/shopify-cro", label: "Shopify funnel optimization" },
-                { href: "/whatsapp-marketing", label: "WhatsApp and Email marketing" },
+                { href: "/services/performance-marketing", label: "Performance marketing" },
+                { href: "/services/ecommerce-store-setup", label: "E-commerce store setup" },
+                { href: "/services/d2c-growth-strategy", label: "D2C growth strategy" },
+                { href: "/services", label: "All services" },
               ].map((l) => (
                 <li key={l.href}>
                   <Link href={l.href} className="text-zinc-500 hover:text-[#5c43fd] transition-colors no-underline font-semibold text-[0.92rem]">{l.label}</Link>
@@ -230,7 +229,8 @@ export default function PrivacyPolicyPage() {
             <h3 className="m-0 text-[0.88rem] font-bold text-[#5c43fd] uppercase tracking-wider mb-4">Contact Us</h3>
             <ul className="m-0 p-0 list-none grid gap-2.5">
               <li><a href="mailto:hello@adsofstupid.com" className="text-zinc-500 hover:text-[#5c43fd] transition-colors no-underline font-semibold text-[0.92rem]">Email: hello@adsofstupid.com</a></li>
-              <li><a href="https://wa.me/910000000000" className="text-zinc-500 hover:text-[#5c43fd] transition-colors no-underline font-semibold text-[0.92rem]">WhatsApp: +91 00000 00000</a></li>
+              <li><a href="https://wa.me/918530639877" className="text-zinc-500 hover:text-[#5c43fd] transition-colors no-underline font-semibold text-[0.92rem]">WhatsApp: +91 85306 39877</a></li>
+              <li><a href="tel:+918530639877" className="text-zinc-500 hover:text-[#5c43fd] transition-colors no-underline font-semibold text-[0.92rem]">Phone: +91 85306 39877</a></li>
               <li className="text-[0.92rem] text-zinc-400 font-semibold">Pune, Maharashtra, India</li>
             </ul>
           </div>
@@ -241,7 +241,7 @@ export default function PrivacyPolicyPage() {
         </div>
 
         <div className="w-[min(1200px,calc(100vw-2rem))] mx-auto mt-16 pt-6 border-t border-white/20 relative z-10 flex flex-col md:flex-row items-center justify-center gap-x-8 gap-y-2 text-white text-[0.82rem] leading-[1.7] px-4 md:px-8 text-center">
-          <span>© 2025 Ads of Stupid. All Rights Reserved.</span>
+          <span>© 2026 Ads of Stupid. All Rights Reserved.</span>
           <span className="text-white/90">Performance marketing agency in Pune for early-stage D2C brands.</span>
           <span className="text-white/80 font-medium italic">No stupid marketing decisions were harmed in the making of this website.</span>
         </div>

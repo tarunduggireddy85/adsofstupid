@@ -10,11 +10,10 @@ const QUICK_LINKS = [
 ];
 
 const SERVICES_LINKS = [
-  { href: "/performance-marketing-agency-pune", label: "Performance marketing" },
-  { href: "/d2c-growth-strategy", label: "D2C growth strategy" },
-  { href: "/meta-ads-management", label: "Meta and Google Ads" },
-  { href: "/shopify-cro", label: "Shopify funnel optimization" },
-  { href: "/whatsapp-marketing", label: "WhatsApp and Email marketing" }
+  { href: "/services/performance-marketing", label: "Performance marketing" },
+  { href: "/services/ecommerce-store-setup", label: "E-commerce store setup" },
+  { href: "/services/d2c-growth-strategy", label: "D2C growth strategy" },
+  { href: "/services", label: "All services" }
 ];
 
 export function BlogFooter() {

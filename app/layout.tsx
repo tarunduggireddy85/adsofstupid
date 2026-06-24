@@ -3,6 +3,9 @@ import { Plus_Jakarta_Sans, Playfair_Display } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { SmoothScroll } from "../components/SmoothScroll";
+import { GtmScript, GtmNoScript } from "../components/GoogleTagManager";
+import { MetaPixelScript } from "../components/MetaPixel";
+import { PixelRouteTracker } from "../components/PixelRouteTracker";
 
 const plusJakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -134,6 +137,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${plusJakarta.variable} ${playfair.variable}`} suppressHydrationWarning>
+        <GtmNoScript />
+        <GtmScript />
+        <MetaPixelScript />
+        <PixelRouteTracker />
         <SmoothScroll />
 
         <Script

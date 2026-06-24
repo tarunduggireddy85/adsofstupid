@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { readLeads, writeLeads, type Lead } from "@/lib/db";
+import { appendLead, type Lead } from "@/lib/db";
 import { notifyNewLead } from "@/lib/notify";
 
 type LeadPayload = {
@@ -45,9 +45,7 @@ export async function POST(request: Request) {
 
   // 1) Persist to the backend (this is what the admin Leads panel reads)
   try {
-    const leads = await readLeads();
-    leads.push(lead);
-    await writeLeads(leads);
+    await appendLead(lead);
   } catch (error) {
     console.error("Failed to save lead:", error);
     return NextResponse.json(

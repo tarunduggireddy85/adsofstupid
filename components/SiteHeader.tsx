@@ -4,11 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { ChevronDown } from "lucide-react";
 import { captureUtm } from "@/lib/leadSource";
 import { onScroll } from "@/lib/scrollListen";
+import { SERVICES } from "@/lib/services";
 
 const LINKS = [
-  { href: "/#formula", label: "Services" },
   { href: "/#proof", label: "Results" },
   { href: "/blog", label: "Blog" },
   { href: "/about", label: "About" },
@@ -20,6 +21,7 @@ export function SiteHeader() {
   const [hidden, setHidden] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [servicesOpen, setServicesOpen] = useState(false);
   const lastY = useRef(0);
 
   // Hide on scroll down, reveal on scroll up. Lenis drives native scroll, so a
@@ -92,6 +94,68 @@ export function SiteHeader() {
             </Link>
 
             <nav aria-label="Primary" className="hidden md:flex items-center gap-6 lg:gap-7">
+              {/* Services dropdown */}
+              <div
+                className="relative"
+                onMouseEnter={() => setServicesOpen(true)}
+                onMouseLeave={() => setServicesOpen(false)}
+              >
+                <Link
+                  href="/services"
+                  aria-haspopup="true"
+                  aria-expanded={servicesOpen}
+                  className={`flex items-center gap-1 text-[0.88rem] font-medium transition-colors no-underline ${
+                    pathname.startsWith("/services") ? "text-[#5c43fd]" : "text-zinc-600 hover:text-[#5c43fd]"
+                  }`}
+                >
+                  Services
+                  <ChevronDown
+                    className={`h-3.5 w-3.5 transition-transform duration-200 ${servicesOpen ? "rotate-180" : ""}`}
+                  />
+                </Link>
+
+                <AnimatePresence>
+                  {servicesOpen ? (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 8 }}
+                      transition={{ duration: 0.16, ease: "easeOut" }}
+                      className="absolute left-1/2 top-full -translate-x-1/2 pt-3"
+                    >
+                      <div className="w-[300px] rounded-2xl border border-zinc-200 bg-white/98 backdrop-blur-lg p-2 shadow-[0_20px_48px_rgba(0,0,0,0.1)]">
+                        {SERVICES.map((s) => (
+                          <Link
+                            key={s.slug}
+                            href={`/services/${s.slug}`}
+                            className="flex items-start gap-3 rounded-xl px-3 py-2.5 no-underline transition-colors hover:bg-zinc-50"
+                          >
+                            <span
+                              className="mt-1 h-2 w-2 shrink-0 rounded-full"
+                              style={{ background: s.accent }}
+                            />
+                            <span className="flex flex-col">
+                              <span className="text-[0.9rem] font-semibold text-zinc-900 leading-tight">
+                                {s.navLabel}
+                              </span>
+                              <span className="text-[0.78rem] text-zinc-500 leading-snug mt-0.5">
+                                {s.tagline}
+                              </span>
+                            </span>
+                          </Link>
+                        ))}
+                        <Link
+                          href="/services"
+                          className="mt-1 flex items-center justify-center gap-1.5 rounded-xl px-3 py-2.5 text-[0.85rem] font-semibold text-[#5c43fd] no-underline transition-colors hover:bg-[#5c43fd]/6"
+                        >
+                          View all services →
+                        </Link>
+                      </div>
+                    </motion.div>
+                  ) : null}
+                </AnimatePresence>
+              </div>
+
               {LINKS.map((link) => (
                 <Link
                   key={link.href}
@@ -144,6 +208,31 @@ export function SiteHeader() {
                 transition={{ duration: 0.22, ease: "easeOut" }}
                 className="md:hidden mt-3 p-3 rounded-3xl border border-zinc-200 bg-white/98 shadow-[0_20px_48px_rgba(0,0,0,0.08)] backdrop-blur-lg flex flex-col gap-1"
               >
+                {/* Services group */}
+                <p className="px-4 pt-2 pb-1 text-[0.72rem] font-bold uppercase tracking-[0.14em] text-zinc-400">
+                  Services
+                </p>
+                {SERVICES.map((s) => (
+                  <Link
+                    key={s.slug}
+                    href={`/services/${s.slug}`}
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-3 w-full py-2.5 px-4 rounded-xl text-[0.92rem] font-semibold text-zinc-700 no-underline transition-colors hover:text-[#5c43fd] hover:bg-zinc-50"
+                  >
+                    <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: s.accent }} />
+                    {s.navLabel}
+                  </Link>
+                ))}
+                <Link
+                  href="/services"
+                  onClick={() => setMenuOpen(false)}
+                  className="w-full py-2 px-4 rounded-xl text-[0.85rem] font-semibold text-[#5c43fd] no-underline transition-colors hover:bg-[#5c43fd]/6"
+                >
+                  View all services →
+                </Link>
+
+                <div className="my-1.5 border-t border-zinc-100" />
+
                 {LINKS.map((link) => (
                   <Link
                     key={link.href}

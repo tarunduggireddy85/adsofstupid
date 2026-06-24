@@ -36,8 +36,8 @@ export function Topbar({ onMenuClick }: TopbarProps) {
   const router = useRouter();
   const user = getAdminUser();
 
-  function handleLogout() {
-    logoutAdmin();
+  async function handleLogout() {
+    await logoutAdmin();
     router.replace("/login");
   }
 
@@ -63,8 +63,8 @@ export function Topbar({ onMenuClick }: TopbarProps) {
             <User size={20} />
           </span>
           <div>
-            <strong>{user?.name ?? "Admin User"}</strong>
-            <p>{user?.email ?? "admin@example.com"}</p>
+            <strong>{user?.name ?? "Admin"}</strong>
+            <p>{user?.email ?? "Signed in"}</p>
           </div>
         </div>
         <button className="admin-button" onClick={handleLogout} type="button">

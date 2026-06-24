@@ -1,11 +1,10 @@
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { readBlogs, writeBlogs } from "@/lib/db";
 import type { BlogPost } from "@/lib/mockBlogs";
+import { isAdminSession } from "@/lib/adminAuth";
 
 export async function GET() {
-  const cookieStore = await cookies();
-  const isAdmin = cookieStore.get("admin_auth")?.value === "true";
+  const isAdmin = await isAdminSession();
 
   try {
     const blogs = await readBlogs();
@@ -27,8 +26,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const cookieStore = await cookies();
-  const isAdmin = cookieStore.get("admin_auth")?.value === "true";
+  const isAdmin = await isAdminSession();
 
   if (!isAdmin) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

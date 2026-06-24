@@ -13,6 +13,17 @@ import type { Lead } from "./db";
 
 const SITE = "Ads of Stupid";
 
+/* Lead fields are attacker-controlled (public form). Escape before placing
+ * them into any email HTML to prevent injected markup / phishing content. */
+function esc(value: string | undefined) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 async function sendOwnerEmail(lead: Lead) {
   const key = process.env.RESEND_API_KEY;
   const to = process.env.LEAD_NOTIFY_TO;
@@ -29,13 +40,13 @@ async function sendOwnerEmail(lead: Lead) {
       html: `
         <h2>New lead on ${SITE}</h2>
         <table style="font-size:15px;line-height:1.7">
-          <tr><td><b>Name</b></td><td>${lead.name}</td></tr>
-          <tr><td><b>Email</b></td><td>${lead.email || "—"}</td></tr>
-          <tr><td><b>Phone</b></td><td>${lead.phone || "—"}</td></tr>
-          <tr><td><b>Brand</b></td><td>${lead.brand || "—"}</td></tr>
-          <tr><td><b>Source</b></td><td>${lead.source}</td></tr>
-          <tr><td><b>Message</b></td><td>${lead.painPoint || "—"}</td></tr>
-          <tr><td><b>Time</b></td><td>${new Date(lead.createdAt).toLocaleString()}</td></tr>
+          <tr><td><b>Name</b></td><td>${esc(lead.name)}</td></tr>
+          <tr><td><b>Email</b></td><td>${esc(lead.email) || "—"}</td></tr>
+          <tr><td><b>Phone</b></td><td>${esc(lead.phone) || "—"}</td></tr>
+          <tr><td><b>Brand</b></td><td>${esc(lead.brand) || "—"}</td></tr>
+          <tr><td><b>Source</b></td><td>${esc(lead.source)}</td></tr>
+          <tr><td><b>Message</b></td><td>${esc(lead.painPoint) || "—"}</td></tr>
+          <tr><td><b>Time</b></td><td>${esc(new Date(lead.createdAt).toLocaleString())}</td></tr>
         </table>`
     })
   });
@@ -55,7 +66,7 @@ async function sendLeadEmail(lead: Lead) {
       to: lead.email,
       subject: `Thanks, ${lead.name} — your free brand strategy is on the way`,
       html: `
-        <p>Hi ${lead.name},</p>
+        <p>Hi ${esc(lead.name)},</p>
         <p>Thanks for reaching out to <b>${SITE}</b>. We've got your details and we'll review your brand and email you a free, no-pressure strategy within 24 hours.</p>
         <p>— Team Ads of Stupid</p>`
     })
@@ -82,25 +93,86 @@ async function sendInteraktWhatsApp(phone: string, templateName: string, bodyVal
   });
 }
 
+// FREE owner WhatsApp alert via CallMeBot (https://www.callmebot.com).
+// No business account / template approval needed — only messages the owner's
+// own opted-in number. Env: CALLMEBOT_PHONE (with country code) + CALLMEBOT_APIKEY.
+async function sendOwnerWhatsAppFree(lead: Lead) {
+  const phone = process.env.CALLMEBOT_PHONE;
+  const apikey = process.env.CALLMEBOT_APIKEY;
+  if (!phone || !apikey) return;
+
+  const lines = [
+    `🔔 New lead on ${SITE}`,
+    `Name: ${lead.name}`,
+    lead.email ? `Email: ${lead.email}` : `Phone: ${lead.phone}`,
+    lead.brand ? `Brand: ${lead.brand}` : null,
+    `Source: ${lead.source}`
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  const url =
+    `https://api.callmebot.com/whatsapp.php?phone=${encodeURIComponent(phone)}` +
+    `&apikey=${encodeURIComponent(apikey)}&text=${encodeURIComponent(lines)}`;
+
+  await fetch(url, { cache: "no-store" });
+}
+
+// FREE official WhatsApp confirmation to the LEAD via Meta's WhatsApp Cloud API.
+// This is the only no-cost way to message a lead who hasn't messaged you first.
+// Needs a Meta WhatsApp app + an APPROVED template. Env:
+//   WHATSAPP_CLOUD_TOKEN, WHATSAPP_CLOUD_PHONE_ID, WHATSAPP_CLOUD_LEAD_TEMPLATE
+async function sendLeadWhatsAppCloud(lead: Lead) {
+  const token = process.env.WHATSAPP_CLOUD_TOKEN;
+  const phoneId = process.env.WHATSAPP_CLOUD_PHONE_ID;
+  const template = process.env.WHATSAPP_CLOUD_LEAD_TEMPLATE;
+  if (!token || !phoneId || !template || !lead.phone) return;
+
+  const digits = lead.phone.replace(/\D/g, "");
+  // Default bare 10-digit Indian numbers to +91.
+  const to = digits.length === 10 ? `91${digits}` : digits;
+
+  await fetch(`https://graph.facebook.com/v21.0/${phoneId}/messages`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      messaging_product: "whatsapp",
+      to,
+      type: "template",
+      template: {
+        name: template,
+        language: { code: process.env.WHATSAPP_CLOUD_LANG || "en" },
+        // Template body should use one {{1}} variable for the lead's name.
+        components: [{ type: "body", parameters: [{ type: "text", text: lead.name }] }]
+      }
+    })
+  });
+}
+
 export async function notifyNewLead(lead: Lead) {
   const tasks: Promise<unknown>[] = [];
 
   // 1) Notify the owner by email
   tasks.push(sendOwnerEmail(lead));
 
-  // 2) Notify the owner on WhatsApp
+  // 2) Notify the owner on WhatsApp — free (CallMeBot) and/or Interakt
+  tasks.push(sendOwnerWhatsAppFree(lead));
+
   const ownerPhone = process.env.OWNER_WHATSAPP;
   const ownerTemplate = process.env.INTERAKT_OWNER_TEMPLATE;
   if (ownerPhone && ownerTemplate) {
     tasks.push(sendInteraktWhatsApp(ownerPhone, ownerTemplate, [lead.name, lead.phone, lead.source]));
   }
 
-  // 3) Confirm to the lead — email if they gave one, else WhatsApp
+  // 3) Confirm to the lead — email (if they gave one) AND WhatsApp (if phone)
   if (lead.email) {
     tasks.push(sendLeadEmail(lead));
-  } else {
+  }
+  if (lead.phone) {
+    // free official path (Meta Cloud API) and/or paid (Interakt) — both env-gated
+    tasks.push(sendLeadWhatsAppCloud(lead));
     const leadTemplate = process.env.INTERAKT_LEAD_TEMPLATE;
-    if (leadTemplate && lead.phone) {
+    if (leadTemplate) {
       tasks.push(sendInteraktWhatsApp(lead.phone, leadTemplate, [lead.name]));
     }
   }

@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { cookies } from "next/headers";
 import { readBlogs } from "@/lib/db";
+import { isAdminSession } from "@/lib/adminAuth";
 import { formatBlogDate, readTime } from "@/lib/blog";
 import { SiteHeader } from "@/components/SiteHeader";
 import { StrategyPopup } from "@/components/StrategyPopup";
@@ -13,7 +13,9 @@ import { EyebrowBadge } from "@/components/ui/EyebrowBadge";
 
 export async function generateStaticParams() {
   const blogs = await readBlogs();
-  return blogs.map((post) => ({ slug: post.slug }));
+  // Only pre-render published posts; drafts/archived stay un-prerendered
+  // (still guarded by the cookie check in the page body).
+  return blogs.filter((post) => post.status === "Published").map((post) => ({ slug: post.slug }));
 }
 
 export async function generateMetadata({
@@ -56,8 +58,7 @@ export default async function BlogPostPage({
   if (!post) notFound();
 
   if (post.status !== "Published") {
-    const cookieStore = await cookies();
-    const isAdmin = cookieStore.get("admin_auth")?.value === "true";
+    const isAdmin = await isAdminSession();
     if (!isAdmin) notFound();
   }
 

@@ -16,15 +16,5 @@
     "painPoint": "Free brand strategy request",
     "source": "Popup",
     "createdAt": "2026-06-22T15:46:41.413Z"
-  },
-  {
-    "id": "lead-1782202453693",
-    "name": "Test Lead (env wiring)",
-    "phone": "",
-    "email": "hello@adsofstupid.com",
-    "brand": "Test Brand",
-    "painPoint": "Verifying the email alert pipeline end to end",
-    "source": "Contact page � email-wiring-test",
-    "createdAt": "2026-06-23T08:14:13.693Z"
   }
 ]

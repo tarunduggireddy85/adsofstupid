@@ -1,13 +1,12 @@
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { readLeads, writeLeads } from "@/lib/db";
+import { isAdminSession } from "@/lib/adminAuth";
 
 export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const cookieStore = await cookies();
-  const isAdmin = cookieStore.get("admin_auth")?.value === "true";
+  const isAdmin = await isAdminSession();
 
   if (!isAdmin) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

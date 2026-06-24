@@ -8,8 +8,8 @@ import styles from "@/app/login/login.module.css";
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [email, setEmail] = useState("admin@example.com");
-  const [password, setPassword] = useState("admin123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -18,7 +18,7 @@ export function LoginForm() {
     setIsSubmitting(true);
     setError("");
 
-    const success = loginAdmin(email, password);
+    const success = await loginAdmin(email, password);
 
     if (!success) {
       setError("Invalid email or password.");
@@ -37,13 +37,8 @@ export function LoginForm() {
           <p className={styles.eyebrow}>Ads of Stupid</p>
           <h1>Admin sign in</h1>
           <p className={styles.description}>
-            Blog management only. Use the dummy credentials below to access the
-            dashboard.
+            Blog &amp; leads management. Sign in with your admin credentials.
           </p>
-          <div className={styles.credentials}>
-            <span>Email: admin@example.com</span>
-            <span>Password: admin123</span>
-          </div>
         </div>
 
         <form className={styles.form} onSubmit={handleSubmit}>

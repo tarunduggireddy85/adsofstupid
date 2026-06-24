@@ -44,6 +44,10 @@
 :root {
   color-scheme: light;
   scroll-behavior: smooth;
+  /* Per-page accent. Defaults to the brand violet; service pages override
+     this on their wrapper so shared elements (footer, popup, social links)
+     adopt the page's colour. Tints use color-mix(in srgb, var(--accent) N%, transparent). */
+  --accent: #5c43fd;
 }
 
 body {

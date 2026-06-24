@@ -106,6 +106,32 @@ const TOOL_SLUGS: Record<string, string> = {
   "Meta Business Suite": "meta"
 };
 
+/* Local logo files (public/logos/*.webp) — owner-provided, take priority over
+   the Simple Icons CDN. */
+const LOCAL_LOGOS: Record<string, string> = {
+  "Ahrefs": "ahrefs.webp",
+  "Screaming Frog": "screaming-frog.webp",
+  "Google Trends": "google-trends.webp",
+  "Google Keyword Planner": "google-keyword-planner.webp",
+  "Google Tag Manager": "google-tag-manager.webp",
+  "Meta Pixel": "meta.webp",
+  "Meta Ads Manager": "meta.webp",
+  "Meta Business Suite": "meta.webp",
+  "Google Ads": "google-ads.webp",
+  "Adobe Photoshop": "adobe-photoshop.webp",
+  "Adobe Premiere Pro": "adobe-premiere-pro.webp",
+  "Canva": "canva.webp",
+  "Leonardo AI": "leonardo-ai.webp",
+  "Sora": "sora.webp",
+  "Veo 3": "veo3.webp",
+  "Shopify": "shopify.webp",
+  "Klaviyo": "klaviyo.webp",
+  "Microsoft Clarity": "microsoft-clarity.webp",
+  "Judge.me": "judgeme.webp",
+  "Google Search Console": "google-search-console.webp",
+  "Looker Studio": "looker-studio.webp"
+};
+
 function monogram(name: string) {
   const clean = name.replace(/\(.*?\)/g, "").trim();
   const stripped = clean.replace(/^(Google|Microsoft|Adobe|Meta)\s+/i, "");
@@ -113,7 +139,10 @@ function monogram(name: string) {
 }
 
 function ToolLogo({ name, color }: { name: string; color: string }) {
+  const local = LOCAL_LOGOS[name];
   const slug = TOOL_SLUGS[name];
+  // Owner-provided local logo first, then the Simple Icons CDN, then a monogram.
+  const src = local ? `/logos/${local}` : slug ? `https://cdn.simpleicons.org/${slug}` : null;
   const [failed, setFailed] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
 
@@ -122,22 +151,22 @@ function ToolLogo({ name, color }: { name: string; color: string }) {
   useEffect(() => {
     const img = imgRef.current;
     if (img && img.complete && img.naturalWidth === 0) setFailed(true);
-  }, [slug]);
+  }, [src]);
 
-  if (slug && !failed) {
+  if (src && !failed) {
     return (
-      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white border border-zinc-200/80 shadow-[0_4px_12px_rgba(20,30,70,0.05)]">
+      <span className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-white border border-zinc-200/80 shadow-[0_4px_12px_rgba(20,30,70,0.05)]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           ref={imgRef}
-          src={`https://cdn.simpleicons.org/${slug}`}
+          src={src}
           alt={`${name} logo`}
-          width={26}
-          height={26}
+          width={28}
+          height={28}
           loading="lazy"
           draggable={false}
           onError={() => setFailed(true)}
-          className="h-[26px] w-[26px] object-contain"
+          className="h-7 w-7 object-contain"
         />
       </span>
     );

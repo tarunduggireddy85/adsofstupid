@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { X, Check, Sparkles } from "lucide-react";
 import { leadSource } from "@/lib/leadSource";
 import { onScroll } from "@/lib/scrollListen";
+import { trackLead } from "@/lib/fbq";
 
 const SESSION_KEY = "aos-strategy-popup";
 
@@ -44,11 +45,14 @@ export function StrategyPopup() {
     return () => unsubscribe();
   }, []);
 
-  // lock body scroll while open
+  // lock body scroll while open — only touch overflow while open, and restore
+  // the previous value so we don't clobber another component's scroll lock.
   useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : "";
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     return () => {
-      document.body.style.overflow = "";
+      document.body.style.overflow = prev;
     };
   }, [open]);
 
@@ -72,6 +76,7 @@ export function StrategyPopup() {
       });
       if (res.ok) {
         setState("success");
+        trackLead({ source: "Popup" });
         return;
       }
       const payload = (await res.json().catch(() => null)) as { error?: string } | null;
@@ -103,8 +108,8 @@ export function StrategyPopup() {
             transition={{ type: "spring", stiffness: 260, damping: 22 }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="absolute -top-16 -right-16 w-44 h-44 rounded-full bg-[#5c43fd]/12 blur-2xl pointer-events-none" />
-            <div className="absolute -bottom-20 -left-16 w-44 h-44 rounded-full bg-[#c061ff]/10 blur-2xl pointer-events-none" />
+            <div className="absolute -top-16 -right-16 w-44 h-44 rounded-full blur-2xl pointer-events-none" style={{ background: "color-mix(in srgb, var(--accent) 12%, transparent)" }} />
+            <div className="absolute -bottom-20 -left-16 w-44 h-44 rounded-full blur-2xl pointer-events-none" style={{ background: "color-mix(in srgb, var(--accent) 10%, transparent)" }} />
 
             <button
               type="button"
@@ -127,21 +132,30 @@ export function StrategyPopup() {
                 <button
                   type="button"
                   onClick={() => setOpen(false)}
-                  className="mt-6 inline-flex items-center justify-center min-h-[3rem] px-7 rounded-full text-[0.95rem] font-semibold bg-[#5c43fd] text-white hover:bg-[#4a32e5] transition-colors"
+                  className="mt-6 inline-flex items-center justify-center min-h-[3rem] px-7 rounded-full text-[0.95rem] font-semibold text-white transition-transform hover:-translate-y-px"
+                  style={{ background: "var(--accent)" }}
                 >
                   Done
                 </button>
               </div>
             ) : (
               <div className="relative flex flex-col items-center text-center">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-[#5c43fd]/8 text-[#5c43fd] px-3 py-1.5 text-[0.74rem] font-bold uppercase tracking-wide">
+                <span
+                  className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[0.74rem] font-bold uppercase tracking-wide text-[color:var(--accent)]"
+                  style={{ background: "color-mix(in srgb, var(--accent) 8%, transparent)" }}
+                >
                   <Sparkles className="h-3.5 w-3.5" />
                   Free strategy
                 </span>
 
                 <h2 className="mt-4 font-sans font-bold text-[clamp(1.9rem,6vw,2.5rem)] leading-[1.1] tracking-tight text-zinc-950">
                   Get a free{" "}
-                  <span className="bg-gradient-to-r from-[#8c76ff] to-[#5c43fd] bg-clip-text text-transparent">brand strategy.</span>
+                  <span
+                    className="bg-clip-text text-transparent"
+                    style={{ backgroundImage: "linear-gradient(to right, color-mix(in srgb, var(--accent) 68%, white), var(--accent))" }}
+                  >
+                    brand strategy.
+                  </span>
                 </h2>
                 <p className="mt-3 text-zinc-500 text-[1rem] leading-[1.65] max-w-[340px]">
                   Drop your number and we&apos;ll send a custom growth plan for your brand — no cost, no pressure.
@@ -153,19 +167,23 @@ export function StrategyPopup() {
                     type="text"
                     required
                     placeholder="Your name"
-                    className="w-full px-4 py-3 rounded-xl border border-zinc-200 bg-zinc-50/50 focus:bg-white text-[0.95rem] text-zinc-900 text-center placeholder:text-zinc-400 focus:outline-none focus:border-[#5c43fd] focus:ring-4 focus:ring-[#5c43fd]/8 transition-all"
+                    className="w-full px-4 py-3 rounded-xl border border-zinc-200 bg-zinc-50/50 focus:bg-white text-[0.95rem] text-zinc-900 text-center placeholder:text-zinc-400 focus:outline-none focus:border-[color:var(--accent)] focus:ring-4 focus:ring-[color:color-mix(in_srgb,var(--accent)_8%,transparent)] transition-all"
                   />
                   <input
                     name="phone"
                     type="tel"
                     required
                     placeholder="WhatsApp / phone number"
-                    className="w-full px-4 py-3 rounded-xl border border-zinc-200 bg-zinc-50/50 focus:bg-white text-[0.95rem] text-zinc-900 text-center placeholder:text-zinc-400 focus:outline-none focus:border-[#5c43fd] focus:ring-4 focus:ring-[#5c43fd]/8 transition-all"
+                    className="w-full px-4 py-3 rounded-xl border border-zinc-200 bg-zinc-50/50 focus:bg-white text-[0.95rem] text-zinc-900 text-center placeholder:text-zinc-400 focus:outline-none focus:border-[color:var(--accent)] focus:ring-4 focus:ring-[color:color-mix(in_srgb,var(--accent)_8%,transparent)] transition-all"
                   />
                   <button
                     type="submit"
                     disabled={state === "submitting"}
-                    className="mt-1 inline-flex items-center justify-center min-h-[3rem] px-6 rounded-full text-[0.98rem] font-semibold bg-gradient-to-r from-[#8c76ff] to-[#5c43fd] text-white shadow-[0_8px_24px_rgba(92,67,253,0.22)] hover:shadow-[0_12px_32px_rgba(92,67,253,0.3)] hover:-translate-y-px active:scale-[0.98] transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="mt-1 inline-flex items-center justify-center min-h-[3rem] px-6 rounded-full text-[0.98rem] font-semibold text-white hover:-translate-y-px active:scale-[0.98] transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                    style={{
+                      backgroundImage: "linear-gradient(to right, color-mix(in srgb, var(--accent) 72%, white), var(--accent))",
+                      boxShadow: "0 8px 24px color-mix(in srgb, var(--accent) 24%, transparent)"
+                    }}
                   >
                     {state === "submitting" ? "Sending..." : "Get my free strategy →"}
                   </button>

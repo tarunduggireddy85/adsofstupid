@@ -35,24 +35,55 @@ async function initDb() {
   }
 }
 
+// Atomic write: write to a temp file then rename, so a crash mid-write can
+// never leave a truncated/corrupt JSON file in place.
+async function writeJsonAtomic(file: string, value: unknown): Promise<void> {
+  const tmp = `${file}.${process.pid}.tmp`;
+  await fs.writeFile(tmp, JSON.stringify(value, null, 2), "utf-8");
+  await fs.rename(tmp, file);
+}
+
+async function readJsonSafe<T>(file: string, fallback: T): Promise<T> {
+  try {
+    const data = await fs.readFile(file, "utf-8");
+    return JSON.parse(data) as T;
+  } catch {
+    // Missing or corrupt file — fall back rather than throwing (which would
+    // 500 the contact form or blank the admin list).
+    return fallback;
+  }
+}
+
 export async function readBlogs(): Promise<BlogPost[]> {
   await initDb();
-  const data = await fs.readFile(BLOGS_FILE, "utf-8");
-  return JSON.parse(data) as BlogPost[];
+  return readJsonSafe<BlogPost[]>(BLOGS_FILE, []);
 }
 
 export async function writeBlogs(blogs: BlogPost[]): Promise<void> {
   await initDb();
-  await fs.writeFile(BLOGS_FILE, JSON.stringify(blogs, null, 2), "utf-8");
+  await writeJsonAtomic(BLOGS_FILE, blogs);
 }
 
 export async function readLeads(): Promise<Lead[]> {
   await initDb();
-  const data = await fs.readFile(LEADS_FILE, "utf-8");
-  return JSON.parse(data) as Lead[];
+  return readJsonSafe<Lead[]>(LEADS_FILE, []);
 }
 
 export async function writeLeads(leads: Lead[]): Promise<void> {
   await initDb();
-  await fs.writeFile(LEADS_FILE, JSON.stringify(leads, null, 2), "utf-8");
+  await writeJsonAtomic(LEADS_FILE, leads);
+}
+
+// Serialize read-modify-write so two simultaneous submissions can't both read
+// the same array and overwrite each other (silently dropping a lead).
+let leadsChain: Promise<unknown> = Promise.resolve();
+export function appendLead(lead: Lead): Promise<void> {
+  const next = leadsChain.then(async () => {
+    const leads = await readLeads();
+    leads.push(lead);
+    await writeLeads(leads);
+  });
+  // keep the chain alive even if this op throws
+  leadsChain = next.catch(() => {});
+  return next;
 }

@@ -3,6 +3,7 @@
 import { FormEvent, useState } from "react";
 import { Contact } from "../Contact";
 import { leadSource } from "@/lib/leadSource";
+import { trackLead } from "@/lib/fbq";
 
 type FormState = "idle" | "submitting" | "success" | "error";
 
@@ -33,6 +34,7 @@ export function ContactForm() {
 
       if (response.ok) {
         setFormState("success");
+        trackLead({ source: "Contact page" });
         form.reset();
         return;
       }

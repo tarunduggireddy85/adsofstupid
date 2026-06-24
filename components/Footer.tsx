@@ -19,19 +19,18 @@ const QUICK_LINKS: FooterLink[] = [
 ];
 
 const SERVICES_LINKS: FooterLink[] = [
-  { href: "/performance-marketing-agency-pune", label: "Performance marketing" },
-  { href: "/d2c-growth-strategy", label: "D2C growth strategy" },
-  { href: "/meta-ads-management", label: "Meta and Google Ads" },
-  { href: "/shopify-cro", label: "Shopify funnel optimization" },
-  { href: "/whatsapp-marketing", label: "WhatsApp and Email marketing" },
+  { href: "/services/performance-marketing", label: "Performance marketing" },
+  { href: "/services/ecommerce-store-setup", label: "E-commerce store setup" },
+  { href: "/services/d2c-growth-strategy", label: "D2C growth strategy" },
+  { href: "/services", label: "All services" },
 ];
 
 export function Footer() {
   const footerBgStyle = {
     background: `
       radial-gradient(circle at 50% 10%, #ffffff 0%, rgba(255, 255, 255, 0.95) 30%, rgba(255, 255, 255, 0) 70%),
-      radial-gradient(at 0% 100%, #8566ff 0px, transparent 55%),
-      radial-gradient(at 100% 100%, #9a7eff 0px, transparent 55%),
+      radial-gradient(at 0% 100%, color-mix(in srgb, var(--accent) 78%, white) 0px, transparent 55%),
+      radial-gradient(at 100% 100%, color-mix(in srgb, var(--accent) 68%, white) 0px, transparent 55%),
       radial-gradient(at 0% 50%, #fbcfe8 0px, transparent 40%),
       radial-gradient(at 100% 50%, #f5d0fe 0px, transparent 40%),
       #f8fafc
@@ -64,14 +63,14 @@ export function Footer() {
         
         
         <div>
-          <h3 className="m-0 text-[0.88rem] font-bold text-[#5c43fd] uppercase tracking-wider mb-4">
+          <h3 className="m-0 text-[0.88rem] font-bold text-[color:var(--accent)] uppercase tracking-wider mb-4">
             Quick links
           </h3>
           <ul className="m-0 p-0 list-none grid gap-2.5">
             {QUICK_LINKS.map((link) => (
               <li key={link.href}>
                 <Link 
-                  className="text-zinc-500 hover:text-[#5c43fd] transition-colors duration-180 no-underline font-semibold text-[0.92rem]" 
+                  className="text-zinc-500 hover:text-[color:var(--accent)] transition-colors duration-180 no-underline font-semibold text-[0.92rem]" 
                   href={link.href}
                 >
                   {link.label}
@@ -83,14 +82,14 @@ export function Footer() {
         
         
         <div>
-          <h3 className="m-0 text-[0.88rem] font-bold text-[#5c43fd] uppercase tracking-wider mb-4">
+          <h3 className="m-0 text-[0.88rem] font-bold text-[color:var(--accent)] uppercase tracking-wider mb-4">
             Services
           </h3>
           <ul className="m-0 p-0 list-none grid gap-2.5">
             {SERVICES_LINKS.map((link) => (
               <li key={link.href}>
                 <Link 
-                  className="text-zinc-500 hover:text-[#5c43fd] transition-colors duration-180 no-underline font-semibold text-[0.92rem]" 
+                  className="text-zinc-500 hover:text-[color:var(--accent)] transition-colors duration-180 no-underline font-semibold text-[0.92rem]" 
                   href={link.href}
                 >
                   {link.label}
@@ -102,22 +101,22 @@ export function Footer() {
         
         
         <div>
-          <h3 className="m-0 text-[0.88rem] font-bold text-[#5c43fd] uppercase tracking-wider mb-4">
+          <h3 className="m-0 text-[0.88rem] font-bold text-[color:var(--accent)] uppercase tracking-wider mb-4">
             Contact Us
           </h3>
           <ul className="m-0 p-0 list-none grid gap-2.5">
             <li>
-              <a className="text-zinc-500 hover:text-[#5c43fd] transition-colors duration-180 no-underline font-semibold text-[0.92rem]" href="mailto:hello@adsofstupid.com">
+              <a className="text-zinc-500 hover:text-[color:var(--accent)] transition-colors duration-180 no-underline font-semibold text-[0.92rem]" href="mailto:hello@adsofstupid.com">
                 Email: hello@adsofstupid.com
               </a>
             </li>
             <li>
-              <a className="text-zinc-500 hover:text-[#5c43fd] transition-colors duration-180 no-underline font-semibold text-[0.92rem]" href="https://wa.me/918530639877">
+              <a className="text-zinc-500 hover:text-[color:var(--accent)] transition-colors duration-180 no-underline font-semibold text-[0.92rem]" href="https://wa.me/918530639877">
                 WhatsApp: +91 85306 39877
               </a>
             </li>
             <li>
-              <a className="text-zinc-500 hover:text-[#5c43fd] transition-colors duration-180 no-underline font-semibold text-[0.92rem]" href="tel:+918530639877">
+              <a className="text-zinc-500 hover:text-[color:var(--accent)] transition-colors duration-180 no-underline font-semibold text-[0.92rem]" href="tel:+918530639877">
                 Phone: +91 85306 39877
               </a>
             </li>
@@ -128,7 +127,10 @@ export function Footer() {
       </div>
       
       
-      <div className="w-full text-center text-[clamp(1.5rem,11.5vw,11.5rem)] font-sans font-black text-[#5c43fd]/[0.07] pointer-events-none mt-16 mb-[-1.5rem] select-none relative z-10 leading-none whitespace-nowrap px-2">
+      <div
+        className="w-full text-center text-[clamp(1.5rem,11.5vw,11.5rem)] font-sans font-black pointer-events-none mt-16 mb-[-1.5rem] select-none relative z-10 leading-none whitespace-nowrap px-2"
+        style={{ color: "color-mix(in srgb, var(--accent) 7%, transparent)" }}
+      >
         Ads Of Stupid
       </div>
       

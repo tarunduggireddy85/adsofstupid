@@ -1,13 +1,14 @@
 "use client";
 
-const AUTH_COOKIE = "admin_auth";
-const USER_STORAGE_KEY = "admin_user";
+/*
+ * Client-side admin auth helpers. The real authentication lives server-side
+ * (lib/adminAuth.ts + /api/admin/login|logout) using a signed, httpOnly
+ * cookie the browser cannot read or forge. The localStorage entry here is
+ * ONLY a display convenience (showing the signed-in name) — it is never the
+ * security gate.
+ */
 
-export const DUMMY_ADMIN = {
-  email: "admin@example.com",
-  password: "admin123",
-  name: "Admin User"
-};
+const USER_STORAGE_KEY = "admin_user";
 
 export type AdminUser = {
   email: string;
@@ -18,45 +19,44 @@ function canUseBrowserApis() {
   return typeof window !== "undefined";
 }
 
-export function loginAdmin(email: string, password: string) {
-  const isValid =
-    email === DUMMY_ADMIN.email && password === DUMMY_ADMIN.password;
+export async function loginAdmin(username: string, password: string): Promise<boolean> {
+  try {
+    const res = await fetch("/api/admin/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password })
+    });
+    if (!res.ok) return false;
 
-  if (!isValid || !canUseBrowserApis()) {
+    if (canUseBrowserApis()) {
+      const user: AdminUser = { email: username, name: username.split("@")[0] || "Admin" };
+      window.localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
+    }
+    return true;
+  } catch {
     return false;
   }
-
-  const user: AdminUser = {
-    email: DUMMY_ADMIN.email,
-    name: DUMMY_ADMIN.name
-  };
-
-  window.localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
-  document.cookie = `${AUTH_COOKIE}=true; path=/; max-age=604800; samesite=lax`;
-
-  return true;
 }
 
-export function logoutAdmin() {
-  if (!canUseBrowserApis()) {
-    return;
+export async function logoutAdmin(): Promise<void> {
+  try {
+    await fetch("/api/admin/logout", { method: "POST" });
+  } catch {
+    // ignore — clearing local display state below is enough for the UI
   }
-
-  window.localStorage.removeItem(USER_STORAGE_KEY);
-  document.cookie = `${AUTH_COOKIE}=; path=/; max-age=0; samesite=lax`;
+  if (canUseBrowserApis()) {
+    window.localStorage.removeItem(USER_STORAGE_KEY);
+  }
 }
 
-export function getAdminUser() {
+export function getAdminUser(): AdminUser | null {
   if (!canUseBrowserApis()) {
     return null;
   }
-
   const rawUser = window.localStorage.getItem(USER_STORAGE_KEY);
-
   if (!rawUser) {
     return null;
   }
-
   try {
     return JSON.parse(rawUser) as AdminUser;
   } catch {

@@ -49,7 +49,7 @@ export function SocialLinks({ className = "" }: { className?: string }) {
           target="_blank"
           rel="noreferrer"
           aria-label={social.label}
-          className="flex items-center justify-center w-9 h-9 rounded-xl border border-zinc-200 bg-white/60 text-zinc-500 hover:text-[#5c43fd] hover:border-[#5c43fd]/25 hover:bg-[#5c43fd]/5 transition-all duration-200 shadow-xs hover:-translate-y-0.5 no-underline"
+          className="flex items-center justify-center w-9 h-9 rounded-xl border border-zinc-200 bg-white/60 text-zinc-500 hover:text-[color:var(--accent)] hover:border-[color:color-mix(in_srgb,var(--accent)_25%,transparent)] hover:bg-[color:color-mix(in_srgb,var(--accent)_6%,transparent)] transition-all duration-200 shadow-xs hover:-translate-y-0.5 no-underline"
         >
           {social.icon}
         </a>
