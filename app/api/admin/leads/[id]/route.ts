@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { readLeads, writeLeads } from "@/lib/db";
+import { deleteLead } from "@/lib/db";
 import { isAdminSession } from "@/lib/adminAuth";
 
 export async function DELETE(
@@ -15,14 +15,12 @@ export async function DELETE(
   const { id } = await params;
 
   try {
-    const leads = await readLeads();
-    const updatedLeads = leads.filter((lead) => lead.id !== id);
+    const deleted = await deleteLead(id);
 
-    if (leads.length === updatedLeads.length) {
+    if (!deleted) {
       return NextResponse.json({ error: "Lead not found" }, { status: 404 });
     }
 
-    await writeLeads(updatedLeads);
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("Failed to delete lead:", error);

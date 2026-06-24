@@ -1,5 +1,4 @@
-import fs from "fs/promises";
-import path from "path";
+import postgres from "postgres";
 import { mockBlogs, type BlogPost } from "./mockBlogs";
 
 export type Lead = {
@@ -13,77 +12,131 @@ export type Lead = {
   createdAt: string;
 };
 
-const DATA_DIR = path.join(process.cwd(), "data");
-const BLOGS_FILE = path.join(DATA_DIR, "blogs.json");
-const LEADS_FILE = path.join(DATA_DIR, "leads.json");
+/*
+ * Data layer — Postgres (Neon / Supabase) via a single DATABASE_URL.
+ *
+ * Blogs and leads are stored one row each, with the full object kept in a
+ * `data` jsonb column (so the BlogPost / Lead shapes don't need a rigid schema).
+ *
+ * If DATABASE_URL is NOT set, reads fall back to the bundled mock data and
+ * writes throw a clear error — so the site still renders before the DB is wired.
+ */
 
-async function initDb() {
-  try {
-    await fs.mkdir(DATA_DIR, { recursive: true });
-  } catch (error) {}
-
-  try {
-    await fs.access(BLOGS_FILE);
-  } catch {
-    await fs.writeFile(BLOGS_FILE, JSON.stringify(mockBlogs, null, 2), "utf-8");
-  }
-
-  try {
-    await fs.access(LEADS_FILE);
-  } catch {
-    await fs.writeFile(LEADS_FILE, JSON.stringify([], null, 2), "utf-8");
-  }
+function dbConfigured() {
+  return Boolean(process.env.DATABASE_URL);
 }
 
-// Atomic write: write to a temp file then rename, so a crash mid-write can
-// never leave a truncated/corrupt JSON file in place.
-async function writeJsonAtomic(file: string, value: unknown): Promise<void> {
-  const tmp = `${file}.${process.pid}.tmp`;
-  await fs.writeFile(tmp, JSON.stringify(value, null, 2), "utf-8");
-  await fs.rename(tmp, file);
+// Reuse one client across warm serverless invocations.
+const g = globalThis as unknown as { _sql?: ReturnType<typeof postgres> };
+function getSql() {
+  if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL is not configured.");
+  if (!g._sql) {
+    // prepare:false keeps it compatible with transaction-pooler endpoints
+    // (Supabase pgBouncer / Neon pooled).
+    g._sql = postgres(process.env.DATABASE_URL, { prepare: false, onnotice: () => {} });
+  }
+  return g._sql;
 }
 
-async function readJsonSafe<T>(file: string, fallback: T): Promise<T> {
-  try {
-    const data = await fs.readFile(file, "utf-8");
-    return JSON.parse(data) as T;
-  } catch {
-    // Missing or corrupt file — fall back rather than throwing (which would
-    // 500 the contact form or blank the admin list).
-    return fallback;
+let schemaReady: Promise<void> | null = null;
+function ensureSchema() {
+  if (!schemaReady) {
+    schemaReady = (async () => {
+      const sql = getSql();
+      await sql`CREATE TABLE IF NOT EXISTS blogs (
+        id text PRIMARY KEY,
+        slug text UNIQUE NOT NULL,
+        status text NOT NULL,
+        created_at timestamptz NOT NULL DEFAULT now(),
+        data jsonb NOT NULL
+      )`;
+      await sql`CREATE TABLE IF NOT EXISTS leads (
+        id text PRIMARY KEY,
+        created_at timestamptz NOT NULL DEFAULT now(),
+        data jsonb NOT NULL
+      )`;
+      // Seed the starter blog posts on a fresh database.
+      const [{ count }] = await sql<{ count: number }[]>`SELECT count(*)::int AS count FROM blogs`;
+      if (count === 0) {
+        for (const b of mockBlogs) {
+          await sql`INSERT INTO blogs (id, slug, status, created_at, data)
+            VALUES (${b.id}, ${b.slug}, ${b.status}, ${b.createdAt}, ${sql.json(b)})
+            ON CONFLICT (id) DO NOTHING`;
+        }
+      }
+    })().catch((e) => {
+      schemaReady = null; // allow retry on a transient failure
+      throw e;
+    });
   }
+  return schemaReady;
 }
+
+// ---------- Blogs ----------
 
 export async function readBlogs(): Promise<BlogPost[]> {
-  await initDb();
-  return readJsonSafe<BlogPost[]>(BLOGS_FILE, []);
+  if (!dbConfigured()) {
+    return [...mockBlogs].sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+  }
+  await ensureSchema();
+  const sql = getSql();
+  const rows = await sql<{ data: BlogPost }[]>`SELECT data FROM blogs ORDER BY created_at DESC`;
+  return rows.map((r) => r.data);
 }
 
-export async function writeBlogs(blogs: BlogPost[]): Promise<void> {
-  await initDb();
-  await writeJsonAtomic(BLOGS_FILE, blogs);
+export async function slugExists(slug: string, exceptId?: string): Promise<boolean> {
+  await ensureSchema();
+  const sql = getSql();
+  const rows = exceptId
+    ? await sql`SELECT 1 FROM blogs WHERE slug = ${slug} AND id <> ${exceptId} LIMIT 1`
+    : await sql`SELECT 1 FROM blogs WHERE slug = ${slug} LIMIT 1`;
+  return rows.length > 0;
 }
+
+export async function createBlog(blog: BlogPost): Promise<void> {
+  await ensureSchema();
+  const sql = getSql();
+  await sql`INSERT INTO blogs (id, slug, status, created_at, data)
+    VALUES (${blog.id}, ${blog.slug}, ${blog.status}, ${blog.createdAt}, ${sql.json(blog)})`;
+}
+
+export async function updateBlog(id: string, blog: BlogPost): Promise<void> {
+  await ensureSchema();
+  const sql = getSql();
+  await sql`UPDATE blogs
+    SET slug = ${blog.slug}, status = ${blog.status}, data = ${sql.json(blog)}
+    WHERE id = ${id}`;
+}
+
+export async function deleteBlog(id: string): Promise<boolean> {
+  await ensureSchema();
+  const sql = getSql();
+  const rows = await sql`DELETE FROM blogs WHERE id = ${id} RETURNING id`;
+  return rows.length > 0;
+}
+
+// ---------- Leads ----------
 
 export async function readLeads(): Promise<Lead[]> {
-  await initDb();
-  return readJsonSafe<Lead[]>(LEADS_FILE, []);
+  if (!dbConfigured()) return [];
+  await ensureSchema();
+  const sql = getSql();
+  const rows = await sql<{ data: Lead }[]>`SELECT data FROM leads ORDER BY created_at DESC`;
+  return rows.map((r) => r.data);
 }
 
-export async function writeLeads(leads: Lead[]): Promise<void> {
-  await initDb();
-  await writeJsonAtomic(LEADS_FILE, leads);
+export async function appendLead(lead: Lead): Promise<void> {
+  await ensureSchema();
+  const sql = getSql();
+  await sql`INSERT INTO leads (id, created_at, data)
+    VALUES (${lead.id}, ${lead.createdAt}, ${sql.json(lead)})`;
 }
 
-// Serialize read-modify-write so two simultaneous submissions can't both read
-// the same array and overwrite each other (silently dropping a lead).
-let leadsChain: Promise<unknown> = Promise.resolve();
-export function appendLead(lead: Lead): Promise<void> {
-  const next = leadsChain.then(async () => {
-    const leads = await readLeads();
-    leads.push(lead);
-    await writeLeads(leads);
-  });
-  // keep the chain alive even if this op throws
-  leadsChain = next.catch(() => {});
-  return next;
+export async function deleteLead(id: string): Promise<boolean> {
+  await ensureSchema();
+  const sql = getSql();
+  const rows = await sql`DELETE FROM leads WHERE id = ${id} RETURNING id`;
+  return rows.length > 0;
 }

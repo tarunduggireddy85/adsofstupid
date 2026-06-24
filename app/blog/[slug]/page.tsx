@@ -11,6 +11,9 @@ import { BlogImage } from "@/components/blog/BlogImage";
 import { PostBody } from "@/components/blog/PostBody";
 import { EyebrowBadge } from "@/components/ui/EyebrowBadge";
 
+// Re-fetch from the DB at most once a minute so admin edits go live without a redeploy.
+export const revalidate = 60;
+
 export async function generateStaticParams() {
   const blogs = await readBlogs();
   // Only pre-render published posts; drafts/archived stay un-prerendered

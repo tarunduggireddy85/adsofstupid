@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { readBlogs, writeBlogs } from "@/lib/db";
+import { readBlogs, createBlog, slugExists } from "@/lib/db";
 import type { BlogPost } from "@/lib/mockBlogs";
 import { isAdminSession } from "@/lib/adminAuth";
 
@@ -54,9 +54,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Title, slug, and content are required." }, { status: 400 });
     }
 
-    const blogs = await readBlogs();
-
-    if (blogs.some((blog) => blog.slug === slug)) {
+    if (await slugExists(slug)) {
       return NextResponse.json({ error: "A blog post with this slug already exists." }, { status: 409 });
     }
 
@@ -78,8 +76,7 @@ export async function POST(request: Request) {
       seoKeywords: seoKeywords || ""
     };
 
-    blogs.push(newBlog);
-    await writeBlogs(blogs);
+    await createBlog(newBlog);
 
     return NextResponse.json(newBlog, { status: 201 });
   } catch (error) {

@@ -9,6 +9,10 @@ import { BlogGrid, type BlogCard } from "@/components/blog/BlogGrid";
 import { BlogImage } from "@/components/blog/BlogImage";
 import { EyebrowBadge } from "@/components/ui/EyebrowBadge";
 
+// Re-fetch from the DB at most once a minute so admin-published posts appear
+// without a redeploy.
+export const revalidate = 60;
+
 export const metadata: Metadata = {
   title: "Blog",
   description:

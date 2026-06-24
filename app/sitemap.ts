@@ -4,6 +4,9 @@ import { SERVICE_SLUGS } from "@/lib/services";
 
 const SITE_URL = "https://www.adsofstupid.com";
 
+// Refresh hourly so new published posts enter the sitemap without a redeploy.
+export const revalidate = 3600;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
 

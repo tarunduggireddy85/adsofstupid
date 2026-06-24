@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { readBlogs, writeBlogs } from "@/lib/db";
+import { readBlogs, updateBlog, deleteBlog, slugExists } from "@/lib/db";
 import type { BlogPost } from "@/lib/mockBlogs";
 import { isAdminSession } from "@/lib/adminAuth";
 
@@ -46,18 +46,14 @@ export async function PUT(
   try {
     const body = await request.json();
     const blogs = await readBlogs();
-    const blogIndex = blogs.findIndex((b) => b.id === id);
+    const existingBlog = blogs.find((b) => b.id === id);
 
-    if (blogIndex === -1) {
+    if (!existingBlog) {
       return NextResponse.json({ error: "Blog not found" }, { status: 404 });
     }
 
-    const existingBlog = blogs[blogIndex];
-
-    if (body.slug && body.slug !== existingBlog.slug) {
-      if (blogs.some((blog) => blog.slug === body.slug)) {
-        return NextResponse.json({ error: "A blog post with this slug already exists." }, { status: 409 });
-      }
+    if (body.slug && body.slug !== existingBlog.slug && (await slugExists(body.slug, id))) {
+      return NextResponse.json({ error: "A blog post with this slug already exists." }, { status: 409 });
     }
 
     const updatedBlog: BlogPost = {
@@ -68,8 +64,7 @@ export async function PUT(
       publishDate: body.publishDate || existingBlog.publishDate || new Date().toISOString().split("T")[0],
     };
 
-    blogs[blogIndex] = updatedBlog;
-    await writeBlogs(blogs);
+    await updateBlog(id, updatedBlog);
 
     return NextResponse.json(updatedBlog);
   } catch (error) {
@@ -91,14 +86,12 @@ export async function DELETE(
   const { id } = await params;
 
   try {
-    const blogs = await readBlogs();
-    const filteredBlogs = blogs.filter((blog) => blog.id !== id);
+    const deleted = await deleteBlog(id);
 
-    if (blogs.length === filteredBlogs.length) {
+    if (!deleted) {
       return NextResponse.json({ error: "Blog not found" }, { status: 404 });
     }
 
-    await writeBlogs(filteredBlogs);
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("Failed to delete blog:", error);
