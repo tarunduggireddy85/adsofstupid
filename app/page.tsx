@@ -27,6 +27,16 @@ import { Footer } from "../components/Footer";
 
 type FormState = "idle" | "submitting" | "success" | "error";
 
+/*
+ * Shared "floating panel" treatment — mirrors the Hero/Footer card so the
+ * lighter sections read as intentional panels resting on the textured
+ * backdrop instead of content floating naked on flat white. Translucent fill
+ * lets the ambient orbs glow through faintly; border + soft shadow define the
+ * edge even where the panel tone is close to the backdrop.
+ */
+const PANEL =
+  "relative isolate overflow-hidden rounded-[2.5rem] border border-zinc-200/60 bg-white/80 shadow-[0_24px_60px_rgba(92,67,253,0.05)] max-w-[1280px] mx-auto mb-8 md:mb-12";
+
 export default function Home() {
   const [errorMessage, setErrorMessage] = useState("");
   const [formState, setFormState] = useState<FormState>("idle");
@@ -87,36 +97,52 @@ export default function Home() {
 
   return (
     <>
+      {/* ambient textured backdrop — a faint dot grid + slow-drifting pastel
+          orbs give the wide side gutters and inter-panel gaps structure, so
+          they read as designed negative space rather than blank white. Fixed
+          and behind everything (-z-10); panels above are translucent so the
+          orbs glow through faintly. */}
+      <div aria-hidden className="fixed inset-0 -z-10 overflow-hidden bg-surface-main">
+        <div className="absolute inset-0 aos-dotgrid" />
+        <div className="absolute -top-[10%] -left-[12%] h-[42rem] w-[42rem] rounded-full bg-[#8566ff]/[0.10] blur-[130px] aos-drift-a" />
+        <div className="absolute top-[40%] -right-[14%] h-[40rem] w-[40rem] rounded-full bg-[#f5b8e0]/[0.12] blur-[130px] aos-drift-b" />
+        <div className="absolute -bottom-[8%] left-[26%] h-[38rem] w-[38rem] rounded-full bg-[#9a7eff]/[0.10] blur-[120px] aos-drift-a" />
+      </div>
+
       <SiteHeader />
 
-      <main className="min-h-screen bg-surface-main pb-8 px-4 md:px-8 text-ink-strong">
+      <main className="min-h-screen pb-8 px-4 md:px-8 text-ink-strong">
 
 
         <div className="max-w-[1280px] mx-auto rounded-[2.5rem] border border-zinc-200/50 bg-[#ffffff]/90 shadow-[0_24px_60px_rgba(92,67,253,0.04)] overflow-hidden relative isolate mb-12">
           <Hero />
         </div>
 
-        <Proof />
-
-
-
+        <div className={PANEL}>
+          <Proof />
+        </div>
 
 
         <Journey />
 
-        <div style={{ isolation: 'isolate', position: 'relative', zIndex: 0 }}>
+        <div className="mb-8 md:mb-12" style={{ isolation: 'isolate', position: 'relative', zIndex: 0 }}>
           <Formula />
         </div>
 
-        <Tools
-          openTool={openTool}
-          setOpenTool={setOpenTool}
-        />
+        <div className={PANEL}>
+          <Tools
+            openTool={openTool}
+            setOpenTool={setOpenTool}
+          />
+        </div>
 
-        <Process />
+        <div className={PANEL}>
+          <Process />
+        </div>
 
-        
-        <WhyUs />
+        <div className={PANEL}>
+          <WhyUs />
+        </div>
 
         <Contact
           formState={formState}

@@ -113,6 +113,20 @@ p {
 @keyframes aos-float-soft { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
 .aos-float-soft { animation: aos-float-soft 6s ease-in-out infinite; will-change: transform; }
 
+/* ============================================================
+   AMBIENT PAGE TEXTURE
+   A faint brand-violet dot grid that lives behind the floating
+   section panels, so the negative space reads as designed rather
+   than blank. Masked to a soft vignette so it never hardens into
+   an obvious grid. Static (no animation) = effectively free.
+   ============================================================ */
+.aos-dotgrid {
+  background-image: radial-gradient(rgba(92, 67, 253, 0.06) 1px, transparent 1.5px);
+  background-size: 30px 30px;
+  -webkit-mask-image: radial-gradient(ellipse 90% 75% at 50% 38%, #000 50%, transparent 100%);
+  mask-image: radial-gradient(ellipse 90% 75% at 50% 38%, #000 50%, transparent 100%);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .aos-orbit, .aos-orbit-rev, .aos-blip, .aos-float-up, .aos-float-down, .aos-card-float, .aos-icon-float,
   .aos-gradient-text, .aos-drift-a, .aos-drift-b, .aos-float-soft {
