@@ -9,6 +9,8 @@ type LeadPayload = {
   phone?: string;
   email?: string;
   source?: string;
+  referrer?: string;
+  landingPage?: string;
 };
 
 function normalize(value: unknown) {
@@ -24,6 +26,8 @@ export async function POST(request: Request) {
   const brand = normalize(body?.brand);
   const painPoint = normalize(body?.painPoint);
   const source = normalize(body?.source) || "Website";
+  const referrer = normalize(body?.referrer) || "Direct";
+  const landingPage = normalize(body?.landingPage);
 
   if (!name || (!phone && !email)) {
     return NextResponse.json(
@@ -40,6 +44,8 @@ export async function POST(request: Request) {
     brand,
     painPoint,
     source,
+    referrer,
+    landingPage,
     createdAt: new Date().toISOString()
   };
 

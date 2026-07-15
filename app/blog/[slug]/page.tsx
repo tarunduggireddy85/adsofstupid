@@ -11,6 +11,8 @@ import { BlogImage } from "@/components/blog/BlogImage";
 import { PostBody } from "@/components/blog/PostBody";
 import { EyebrowBadge } from "@/components/ui/EyebrowBadge";
 
+const SITE_URL = "https://www.adsofstupid.com";
+
 // Re-fetch from the DB at most once a minute so admin edits go live without a redeploy.
 export const revalidate = 60;
 
@@ -77,8 +79,61 @@ export default async function BlogPostPage({
   const tags = post.tags && post.tags.length ? post.tags : [post.category];
   const formattedPublishDate = formatBlogDate(post.publishDate || post.createdAt);
 
+  // Structured data — plain <script> so AI crawlers (which don't run JS) see it.
+  const postUrl = `${SITE_URL}/blog/${post.slug}`;
+  const imageUrl = post.featuredImage
+    ? post.featuredImage.startsWith("http")
+      ? post.featuredImage
+      : `${SITE_URL}${post.featuredImage}`
+    : `${SITE_URL}/og-image.png`;
+
+  const blogPostingSchema = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: post.title,
+    description: post.seoDescription || post.description,
+    image: imageUrl,
+    url: postUrl,
+    mainEntityOfPage: { "@type": "WebPage", "@id": postUrl },
+    datePublished: new Date(post.publishDate || post.createdAt).toISOString(),
+    dateModified: new Date(post.publishDate || post.createdAt).toISOString(),
+    author: {
+      "@type": "Person",
+      name: post.author || "Tharun Duggireddy",
+      jobTitle: "Founder, Ads of Stupid",
+      url: `${SITE_URL}/about`
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "Ads of Stupid",
+      url: SITE_URL,
+      logo: { "@type": "ImageObject", url: `${SITE_URL}/Ads-of-Stupid-logo.png` }
+    },
+    articleSection: post.category,
+    keywords: (post.seoKeywords || tags.join(", ")) || undefined,
+    inLanguage: "en-IN"
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+      { "@type": "ListItem", position: 2, name: "Blog", item: `${SITE_URL}/blog` },
+      { "@type": "ListItem", position: 3, name: post.title, item: postUrl }
+    ]
+  };
+
   return (
     <div className="min-h-screen bg-surface-main">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(blogPostingSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       <SiteHeader />
 
       <main className="w-full">

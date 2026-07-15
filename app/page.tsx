@@ -6,7 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 
 import { SiteHeader } from "../components/SiteHeader";
 import { StrategyPopup } from "../components/StrategyPopup";
-import { leadSource } from "../lib/leadSource";
+import { leadSource, getAttribution } from "../lib/leadSource";
 import { trackLead } from "../lib/fbq";
 import { Hero } from "../components/Hero";
 import { Proof } from "../components/Proof";
@@ -71,6 +71,7 @@ export default function Home() {
           name: formData.get("name"),
           painPoint: formData.get("painPoint"),
           email: formData.get("email"),
+          ...getAttribution(),
           source: leadSource("Homepage contact")
         }),
         headers: {

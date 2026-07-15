@@ -66,7 +66,9 @@ export default function LeadsPage() {
       lead.painPoint.toLowerCase().includes(query) ||
       lead.phone.toLowerCase().includes(query) ||
       (lead.email || "").toLowerCase().includes(query) ||
-      (lead.source || "").toLowerCase().includes(query)
+      (lead.source || "").toLowerCase().includes(query) ||
+      (lead.referrer || "").toLowerCase().includes(query) ||
+      (lead.landingPage || "").toLowerCase().includes(query)
     );
   });
 
@@ -107,6 +109,7 @@ export default function LeadsPage() {
                 <tr>
                   <th>Submitter</th>
                   <th>Source</th>
+                  <th>Came From</th>
                   <th>Brand Info</th>
                   <th>Core Pain Point</th>
                   <th>Submitted At</th>
@@ -138,6 +141,32 @@ export default function LeadsPage() {
                       <span className="admin-badge admin-badge--published" style={{ background: "rgba(92,67,253,0.1)", color: "#5c43fd" }}>
                         {lead.source || "Website"}
                       </span>
+                    </td>
+                    <td>
+                      {(() => {
+                        const ref = lead.referrer || "—";
+                        const isAi = ["ChatGPT", "Claude", "Perplexity", "Gemini", "Copilot"].includes(ref);
+                        return (
+                          <>
+                            <span
+                              className="admin-badge"
+                              style={
+                                isAi
+                                  ? { background: "rgba(16,163,127,0.12)", color: "#0f8f70" }
+                                  : { background: "rgba(113,113,122,0.1)", color: "#52525b" }
+                              }
+                              title={isAi ? "AI answer engine referral" : undefined}
+                            >
+                              {isAi ? `✦ ${ref}` : ref}
+                            </span>
+                            {lead.landingPage ? (
+                              <div className="text-[0.75rem] text-zinc-400 mt-1 max-w-[180px] truncate" title={lead.landingPage}>
+                                {lead.landingPage}
+                              </div>
+                            ) : null}
+                          </>
+                        );
+                      })()}
                     </td>
                     <td>
                       <div className="flex items-center gap-1.5 font-medium text-zinc-800">

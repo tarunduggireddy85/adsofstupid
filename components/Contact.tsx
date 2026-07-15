@@ -10,6 +10,9 @@ interface ContactProps {
   formState: "idle" | "submitting" | "success" | "error";
   errorMessage: string;
   handleSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  /* On /contact this block IS the page heading, so it renders an <h1>.
+     On the homepage the Hero owns the <h1>, so this stays an <h2>. */
+  headingLevel?: "h1" | "h2";
 }
 
 const GOAL_OPTIONS = [
@@ -69,8 +72,10 @@ const slideVariants = {
 export function Contact({
   formState,
   errorMessage,
-  handleSubmit
+  handleSubmit,
+  headingLevel = "h2"
 }: ContactProps) {
+  const Heading = headingLevel === "h1" ? motion.h1 : motion.h2;
   const [step, setStep] = useState(0);
   const [dir, setDir] = useState(1);
   const [stepError, setStepError] = useState("");
@@ -124,7 +129,7 @@ export function Contact({
         <div className="w-[min(840px,100%)] mx-auto text-center mb-12 flex flex-col items-center select-none">
           <EyebrowBadge animatePulse>Let&apos;s Talk</EyebrowBadge>
 
-          <motion.h2
+          <Heading
             className="font-sans font-semibold text-[clamp(2.2rem,5vw,3.6rem)] leading-[1.1] text-zinc-950 tracking-tight"
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -136,7 +141,7 @@ export function Contact({
             <span className="text-[#5c43fd] bg-gradient-to-r from-[#8c76ff] to-[#5c43fd] bg-clip-text text-transparent">
               marketing?
             </span>
-          </motion.h2>
+          </Heading>
 
           <motion.p
             className="text-zinc-500 max-w-[580px] mx-auto text-[1.05rem] leading-[1.7] mt-4"

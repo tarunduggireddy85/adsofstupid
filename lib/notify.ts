@@ -45,6 +45,8 @@ async function sendOwnerEmail(lead: Lead) {
           <tr><td><b>Phone</b></td><td>${esc(lead.phone) || "—"}</td></tr>
           <tr><td><b>Brand</b></td><td>${esc(lead.brand) || "—"}</td></tr>
           <tr><td><b>Source</b></td><td>${esc(lead.source)}</td></tr>
+          <tr><td><b>Came from</b></td><td>${esc(lead.referrer) || "—"}</td></tr>
+          <tr><td><b>Landed on</b></td><td>${esc(lead.landingPage) || "—"}</td></tr>
           <tr><td><b>Message</b></td><td>${esc(lead.painPoint) || "—"}</td></tr>
           <tr><td><b>Time</b></td><td>${esc(new Date(lead.createdAt).toLocaleString())}</td></tr>
         </table>`

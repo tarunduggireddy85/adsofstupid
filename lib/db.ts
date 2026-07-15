@@ -9,6 +9,10 @@ export type Lead = {
   brand: string;
   painPoint: string;
   source: string;
+  /** Channel the visitor arrived from (e.g. "ChatGPT", "Google", "Direct"). */
+  referrer?: string;
+  /** First page of the session (e.g. "/services/performance-marketing"). */
+  landingPage?: string;
   createdAt: string;
 };
 

@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { Contact } from "../Contact";
-import { leadSource } from "@/lib/leadSource";
+import { leadSource, getAttribution } from "@/lib/leadSource";
 import { trackLead } from "@/lib/fbq";
 
 type FormState = "idle" | "submitting" | "success" | "error";
@@ -26,6 +26,7 @@ export function ContactForm() {
           name: formData.get("name"),
           painPoint: formData.get("painPoint"),
           email: formData.get("email"),
+          ...getAttribution(),
           source: leadSource("Contact page")
         }),
         headers: { "Content-Type": "application/json" },
@@ -50,5 +51,13 @@ export function ContactForm() {
     }
   }
 
-  return <Contact formState={formState} errorMessage={errorMessage} handleSubmit={handleSubmit} />;
+  // On /contact this block is the page's main heading → render it as the <h1>.
+  return (
+    <Contact
+      formState={formState}
+      errorMessage={errorMessage}
+      handleSubmit={handleSubmit}
+      headingLevel="h1"
+    />
+  );
 }

@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Playfair_Display } from "next/font/google";
-import Script from "next/script";
 import "./globals.css";
 import { SmoothScroll } from "../components/SmoothScroll";
 import { GtmScript, GtmNoScript } from "../components/GoogleTagManager";
@@ -143,26 +142,21 @@ export default function RootLayout({
         <PixelRouteTracker />
         <SmoothScroll />
 
-        <Script
-          id="ads-of-stupid-organization-schema"
+        {/* Structured data MUST be plain <script> tags, not next/script.
+            next/script injects client-side after hydration, which AI crawlers
+            (GPTBot / ClaudeBot / PerplexityBot) never see because they don't
+            execute JavaScript. These render straight into the server HTML. */}
+        <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify(organizationSchema)
-          }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
         />
-        <Script
-          id="ads-of-stupid-local-business-schema"
+        <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify(localBusinessSchema)
-          }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
         />
-        <Script
-          id="ads-of-stupid-service-schema"
+        <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify(serviceSchema)
-          }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }}
         />
         {children}
       </body>

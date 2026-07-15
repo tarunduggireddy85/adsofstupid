@@ -3,7 +3,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { X, Check, Sparkles } from "lucide-react";
-import { leadSource } from "@/lib/leadSource";
+import { leadSource, getAttribution } from "@/lib/leadSource";
 import { onScroll } from "@/lib/scrollListen";
 import { trackLead } from "@/lib/fbq";
 
@@ -71,6 +71,7 @@ export function StrategyPopup() {
           phone: data.get("phone"),
           brand: "",
           painPoint: "Free brand strategy request",
+          ...getAttribution(),
           source: leadSource("Popup")
         })
       });
