@@ -2,21 +2,27 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import dynamic from "next/dynamic";
 
 
 import { SiteHeader } from "../components/SiteHeader";
 import { StrategyPopup } from "../components/StrategyPopup";
 import { leadSource, getAttribution } from "../lib/leadSource";
 import { trackLead } from "../lib/fbq";
+// Above / near the fold — keep eager for a fast first paint.
 import { Hero } from "../components/Hero";
 import { Proof } from "../components/Proof";
-import { Journey } from "../components/Journey";
-import { Formula } from "../components/Formula";
-import { Tools } from "../components/Tools";
-import { Process } from "../components/Process";
-import { WhyUs } from "../components/WhyUs";
-import { Contact } from "../components/Contact";
+import { HomeServices } from "../components/HomeServices";
 import { Footer } from "../components/Footer";
+
+// Below the fold — code-split so the heavy animated sections don't block the
+// hero. ssr:true keeps them in the server HTML, so SEO/content is unchanged.
+const Journey = dynamic(() => import("../components/Journey").then((m) => m.Journey));
+const Formula = dynamic(() => import("../components/Formula").then((m) => m.Formula));
+const Tools = dynamic(() => import("../components/Tools").then((m) => m.Tools));
+const Process = dynamic(() => import("../components/Process").then((m) => m.Process));
+const WhyUs = dynamic(() => import("../components/WhyUs").then((m) => m.WhyUs));
+const Contact = dynamic(() => import("../components/Contact").then((m) => m.Contact));
 
 /*
  * NOTE: Workflow, KeyFeatures, CoreValues, Testimonials, Trust, Blog and CTA
@@ -123,6 +129,10 @@ export default function Home() {
 
         <div className={PANEL}>
           <Proof />
+        </div>
+
+        <div className={PANEL}>
+          <HomeServices />
         </div>
 
 
