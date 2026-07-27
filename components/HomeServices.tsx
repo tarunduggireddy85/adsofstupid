@@ -44,8 +44,8 @@ export function HomeServices() {
   };
 
   return (
-    <section className="py-16 lg:py-24 scroll-mt-28" id="services">
-      <div className="w-[min(1200px,calc(100vw-2rem))] mx-auto">
+    <section className="py-12 sm:py-16 lg:py-24 scroll-mt-28 px-5 sm:px-8" id="services">
+      <div className="mx-auto max-w-[1200px]">
         <SectionHeader
           eyebrow="What we do"
           title="Three services. One growth system."
@@ -67,7 +67,7 @@ export function HomeServices() {
                 <Link
                   href={`/services/${s.slug}`}
                   aria-label={`${s.navLabel} — ${s.tagline}`}
-                  className="group/card relative flex aspect-[1/1.15] flex-col overflow-hidden rounded-[24px] p-7 no-underline
+                  className="group/card relative flex aspect-[1/1.15] flex-col overflow-hidden rounded-[24px] p-6 sm:p-7 no-underline
                              transition-[transform,box-shadow,opacity] duration-[400ms] ease-[cubic-bezier(0.22,1,0.36,1)]
                              hover:-translate-y-1.5 hover:shadow-[0_18px_44px_-12px_rgba(92,67,253,0.55)]
                              group-hover/svc:opacity-[0.85] hover:!opacity-100
