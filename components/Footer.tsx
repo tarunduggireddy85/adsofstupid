@@ -47,9 +47,11 @@ export function Footer() {
         <div className="flex flex-col items-start">
           <Link href="/" className="flex items-center gap-2.5 mb-4 group no-underline">
             <img
-              src="/Ads-of-Stupid-logo.png"
+              src="/logo-mark.webp"
               alt="Ads of Stupid Logo"
-              className="h-9 w-auto object-contain transition-transform duration-300 group-hover:scale-102"
+              width={36}
+              height={36}
+              className="h-9 w-9 object-contain transition-transform duration-300 group-hover:scale-102"
             />
             <span className="font-sans text-[1.65rem] font-bold text-[#0f172a] leading-none">
               Ads of Stupid

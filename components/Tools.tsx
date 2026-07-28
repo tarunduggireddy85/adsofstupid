@@ -219,12 +219,18 @@ export function Tools({ openTool, setOpenTool }: ToolsProps) {
                 style={
                   isActive
                     ? { background: row.color, borderColor: row.color, color: "#fff", outlineColor: row.color }
-                    : { background: "#ffffff", borderColor: `${row.color}33`, color: row.color, outlineColor: row.color }
+                    : {
+                        background: "#ffffff",
+                        borderColor: `${row.color}33`,
+                        // darkened accent so text meets 4.5:1 contrast on white
+                        color: `color-mix(in srgb, ${row.color} 68%, #000)`,
+                        outlineColor: row.color
+                      }
                 }
               >
                 <span
-                  className="text-[0.72rem] font-bold tabular-nums opacity-80"
-                  style={{ color: isActive ? "rgba(255,255,255,0.85)" : `${row.color}` }}
+                  className="text-[0.72rem] font-bold tabular-nums opacity-90"
+                  style={{ color: isActive ? "rgba(255,255,255,0.9)" : `color-mix(in srgb, ${row.color} 68%, #000)` }}
                 >
                   {row.number}
                 </span>

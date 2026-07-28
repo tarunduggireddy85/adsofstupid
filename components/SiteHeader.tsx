@@ -84,9 +84,11 @@ export function SiteHeader() {
             <Link href="/" className="flex items-center gap-2 no-underline shrink-0 group">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="/Ads-of-Stupid-logo.png"
+                src="/logo-mark.webp"
                 alt="Ads of Stupid"
-                className="h-8 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+                width={32}
+                height={32}
+                className="h-8 w-8 object-contain transition-transform duration-300 group-hover:scale-105"
               />
               <span className="font-semibold text-zinc-900 tracking-tight text-[1.05rem] hidden sm:inline">
                 Ads of Stupid

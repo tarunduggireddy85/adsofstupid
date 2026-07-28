@@ -36,9 +36,11 @@ export function BlogFooter() {
           <Link href="/" className="flex items-center gap-2.5 mb-4 group no-underline">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/Ads-of-Stupid-logo.png"
+              src="/logo-mark.webp"
               alt="Ads of Stupid Logo"
-              className="h-9 w-auto object-contain"
+              width={36}
+              height={36}
+              className="h-9 w-9 object-contain"
             />
             <span className="font-sans text-[1.65rem] font-bold text-[#0f172a] leading-none">Ads of Stupid</span>
           </Link>

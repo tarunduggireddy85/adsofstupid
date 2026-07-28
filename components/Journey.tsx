@@ -112,21 +112,21 @@ const toneStyles: Record<
 > = {
   gray: {
     card: "bg-white border-zinc-200/80",
-    accent: "text-zinc-400",
+    accent: "text-zinc-500",
     title: "text-zinc-900",
     bigNum: "text-zinc-900/[0.04]",
     ring: "bg-zinc-100",
   },
   amber: {
     card: "bg-[#FFFBEB] border-amber-300/60",
-    accent: "text-amber-600",
+    accent: "text-amber-700",
     title: "text-zinc-900",
     bigNum: "text-amber-500/[0.10]",
     ring: "bg-amber-100",
   },
   red: {
     card: "bg-[#FEF2F2] border-red-300/60",
-    accent: "text-red-600",
+    accent: "text-red-700",
     title: "text-zinc-900",
     bigNum: "text-red-500/[0.10]",
     ring: "bg-red-100",
@@ -201,7 +201,7 @@ export function Journey() {
                     <h3 className={`mt-3 font-sans font-semibold tracking-tight leading-[1.05] text-[clamp(2.4rem,6vw,4.5rem)] ${t.title}`}>
                       {step.title}
                     </h3>
-                    <p className="mt-4 text-zinc-500 text-[1.05rem] sm:text-[1.25rem] leading-[1.5]">
+                    <p className="mt-4 text-zinc-600 text-[1.05rem] sm:text-[1.25rem] leading-[1.5]">
                       {step.sub}
                     </p>
                   </div>
