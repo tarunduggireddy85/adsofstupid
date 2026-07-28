@@ -390,8 +390,11 @@ function Phone({
                   </div>
                   <div className="h-[5px] rounded-md bg-[#EEF1F7] overflow-hidden">
                     <div
-                      className="h-full rounded-md transition-[width] duration-700 ease-out"
-                      style={{ width: Math.max(6, (c.total / maxTotal) * 100) + "%", background: c.color }}
+                      className="h-full w-full origin-left rounded-md transition-transform duration-700 ease-out"
+                      style={{
+                        transform: `scaleX(${Math.max(6, (c.total / maxTotal) * 100) / 100})`,
+                        background: c.color
+                      }}
                     />
                   </div>
                 </div>

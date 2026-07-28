@@ -136,6 +136,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${plusJakarta.variable} ${playfair.variable}`} suppressHydrationWarning>
+        {/* Warm connections to the heaviest third-party origins (React hoists these to <head>). */}
+        <link rel="preconnect" href="https://www.googletagmanager.com" />
+        <link rel="preconnect" href="https://connect.facebook.net" crossOrigin="" />
+        <link rel="dns-prefetch" href="https://www.google.com" />
         <GtmNoScript />
         <GtmScript />
         <MetaPixelScript />
